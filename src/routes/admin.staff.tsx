@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/staff")({ component: () => <ModuleP
   { title: "Engagement scores", body: "AI-derived classroom engagement signals — celebrate strengths, support struggles." },
   { title: "PD tracking", body: "Log professional development hours, certifications, observations." },
   { title: "Scheduling", body: "Visualize teaching loads — flag overloads automatically." },
-]} />)});
+]} /> });

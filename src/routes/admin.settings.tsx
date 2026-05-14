@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/settings")({ component: () => <Modu
   { title: "Roles & permissions", body: "Granular control over who sees what." },
   { title: "Integrations", body: "Google Workspace, Microsoft 365, WhatsApp Business, Stripe." },
   { title: "Data export", body: "GDPR-compliant full data export per student or whole school." },
-]} />)});
+]} /> });

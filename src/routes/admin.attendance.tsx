@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/attendance")({ component: () => <Mo
   { chip: "Forecast", title: "Attendance forecasting", body: "Predict tomorrow's attendance per class with confidence intervals; flag risk patterns 7 days ahead." },
   { chip: "Notify", title: "Auto parent alert", body: "Unexcused absence triggers WhatsApp + in-app notification within 15 minutes." },
   { chip: "Patterns", title: "Pattern detection", body: "AI surfaces day-of-week patterns, route correlations, post-holiday dips." },
-]} />)});
+]} /> });

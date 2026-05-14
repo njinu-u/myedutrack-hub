@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/timetable")({ component: () => <Mod
   { title: "Live view", body: "See exactly which classes are running right now, school-wide." },
   { title: "Substitute cover", body: "AI suggests cover teachers based on subject expertise and current free periods." },
   { title: "Multi-campus", body: "Run distinct timetables per campus from one console." },
-]} />)});
+]} /> });

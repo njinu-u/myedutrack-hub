@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/communication")({ component: () => 
   { title: "Targeted segments", body: "Message a class, a grade, a nationality, or a custom segment." },
   { title: "Auto-translation", body: "Compose in English; parents receive in their preferred language." },
   { title: "Read receipts", body: "Track which families have seen which announcements." },
-]} />)});
+]} /> });

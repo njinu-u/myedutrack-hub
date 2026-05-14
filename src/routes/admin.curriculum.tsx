@@ -5,4 +5,4 @@ export const Route = createFileRoute("/admin/curriculum")({ component: () => <Mo
   { title: "Unit plans", body: "Shared unit plan library — teachers borrow, adapt, contribute." },
   { title: "Vertical alignment", body: "Flag gaps between Grade 7 and Grade 8 in any subject." },
   { title: "Resource library", body: "Linked teaching resources, marking schemes, and exemplars per unit." },
-]} />)});
+]} /> });
