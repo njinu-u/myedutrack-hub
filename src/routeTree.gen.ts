@@ -18,6 +18,9 @@ import { Route as CounselorRouteImport } from './routes/counselor'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
+import { Route as StudentIndexRouteImport } from './routes/student.index'
+import { Route as ParentIndexRouteImport } from './routes/parent.index'
+import { Route as CounselorIndexRouteImport } from './routes/counselor.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TeacherReportsRouteImport } from './routes/teacher.reports'
 import { Route as TeacherObservationsRouteImport } from './routes/teacher.observations'
@@ -27,6 +30,21 @@ import { Route as TeacherClassesRouteImport } from './routes/teacher.classes'
 import { Route as TeacherAttendanceRouteImport } from './routes/teacher.attendance'
 import { Route as TeacherAssessmentsRouteImport } from './routes/teacher.assessments'
 import { Route as TeacherAiRouteImport } from './routes/teacher.ai'
+import { Route as StudentReportsRouteImport } from './routes/student.reports'
+import { Route as StudentMoodRouteImport } from './routes/student.mood'
+import { Route as StudentGrowthRouteImport } from './routes/student.growth'
+import { Route as StudentGradesRouteImport } from './routes/student.grades'
+import { Route as StudentGoalsRouteImport } from './routes/student.goals'
+import { Route as ParentResourcesRouteImport } from './routes/parent.resources'
+import { Route as ParentMessagesRouteImport } from './routes/parent.messages'
+import { Route as ParentGradesRouteImport } from './routes/parent.grades'
+import { Route as ParentAttendanceRouteImport } from './routes/parent.attendance'
+import { Route as ParentAppointmentsRouteImport } from './routes/parent.appointments'
+import { Route as CounselorWellbeingRouteImport } from './routes/counselor.wellbeing'
+import { Route as CounselorStudentsRouteImport } from './routes/counselor.students'
+import { Route as CounselorSessionsRouteImport } from './routes/counselor.sessions'
+import { Route as CounselorRiskRouteImport } from './routes/counselor.risk'
+import { Route as CounselorInterventionsRouteImport } from './routes/counselor.interventions'
 import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
@@ -86,6 +104,21 @@ const TeacherIndexRoute = TeacherIndexRouteImport.update({
   path: '/',
   getParentRoute: () => TeacherRoute,
 } as any)
+const StudentIndexRoute = StudentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StudentRoute,
+} as any)
+const ParentIndexRoute = ParentIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParentRoute,
+} as any)
+const CounselorIndexRoute = CounselorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CounselorRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -130,6 +163,81 @@ const TeacherAiRoute = TeacherAiRouteImport.update({
   id: '/ai',
   path: '/ai',
   getParentRoute: () => TeacherRoute,
+} as any)
+const StudentReportsRoute = StudentReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentMoodRoute = StudentMoodRouteImport.update({
+  id: '/mood',
+  path: '/mood',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentGrowthRoute = StudentGrowthRouteImport.update({
+  id: '/growth',
+  path: '/growth',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentGradesRoute = StudentGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentGoalsRoute = StudentGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => StudentRoute,
+} as any)
+const ParentResourcesRoute = ParentResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => ParentRoute,
+} as any)
+const ParentMessagesRoute = ParentMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => ParentRoute,
+} as any)
+const ParentGradesRoute = ParentGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => ParentRoute,
+} as any)
+const ParentAttendanceRoute = ParentAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => ParentRoute,
+} as any)
+const ParentAppointmentsRoute = ParentAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => ParentRoute,
+} as any)
+const CounselorWellbeingRoute = CounselorWellbeingRouteImport.update({
+  id: '/wellbeing',
+  path: '/wellbeing',
+  getParentRoute: () => CounselorRoute,
+} as any)
+const CounselorStudentsRoute = CounselorStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => CounselorRoute,
+} as any)
+const CounselorSessionsRoute = CounselorSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => CounselorRoute,
+} as any)
+const CounselorRiskRoute = CounselorRiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => CounselorRoute,
+} as any)
+const CounselorInterventionsRoute = CounselorInterventionsRouteImport.update({
+  id: '/interventions',
+  path: '/interventions',
+  getParentRoute: () => CounselorRoute,
 } as any)
 const AdminTimetableRoute = AdminTimetableRouteImport.update({
   id: '/timetable',
@@ -200,11 +308,11 @@ const AdminStudentsIdRoute = AdminStudentsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/counselor': typeof CounselorRoute
+  '/counselor': typeof CounselorRouteWithChildren
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
-  '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
+  '/parent': typeof ParentRouteWithChildren
+  '/student': typeof StudentRouteWithChildren
   '/teacher': typeof TeacherRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/assessments': typeof AdminAssessmentsRoute
@@ -218,6 +326,21 @@ export interface FileRoutesByFullPath {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/timetable': typeof AdminTimetableRoute
+  '/counselor/interventions': typeof CounselorInterventionsRoute
+  '/counselor/risk': typeof CounselorRiskRoute
+  '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/students': typeof CounselorStudentsRoute
+  '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/parent/appointments': typeof ParentAppointmentsRoute
+  '/parent/attendance': typeof ParentAttendanceRoute
+  '/parent/grades': typeof ParentGradesRoute
+  '/parent/messages': typeof ParentMessagesRoute
+  '/parent/resources': typeof ParentResourcesRoute
+  '/student/goals': typeof StudentGoalsRoute
+  '/student/grades': typeof StudentGradesRoute
+  '/student/growth': typeof StudentGrowthRoute
+  '/student/mood': typeof StudentMoodRoute
+  '/student/reports': typeof StudentReportsRoute
   '/teacher/ai': typeof TeacherAiRoute
   '/teacher/assessments': typeof TeacherAssessmentsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
@@ -227,16 +350,16 @@ export interface FileRoutesByFullPath {
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/admin/': typeof AdminIndexRoute
+  '/counselor/': typeof CounselorIndexRoute
+  '/parent/': typeof ParentIndexRoute
+  '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/admin/students/$id': typeof AdminStudentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/counselor': typeof CounselorRoute
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
-  '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/assessments': typeof AdminAssessmentsRoute
   '/admin/attendance': typeof AdminAttendanceRoute
@@ -249,6 +372,21 @@ export interface FileRoutesByTo {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/timetable': typeof AdminTimetableRoute
+  '/counselor/interventions': typeof CounselorInterventionsRoute
+  '/counselor/risk': typeof CounselorRiskRoute
+  '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/students': typeof CounselorStudentsRoute
+  '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/parent/appointments': typeof ParentAppointmentsRoute
+  '/parent/attendance': typeof ParentAttendanceRoute
+  '/parent/grades': typeof ParentGradesRoute
+  '/parent/messages': typeof ParentMessagesRoute
+  '/parent/resources': typeof ParentResourcesRoute
+  '/student/goals': typeof StudentGoalsRoute
+  '/student/grades': typeof StudentGradesRoute
+  '/student/growth': typeof StudentGrowthRoute
+  '/student/mood': typeof StudentMoodRoute
+  '/student/reports': typeof StudentReportsRoute
   '/teacher/ai': typeof TeacherAiRoute
   '/teacher/assessments': typeof TeacherAssessmentsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
@@ -258,6 +396,9 @@ export interface FileRoutesByTo {
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/admin': typeof AdminIndexRoute
+  '/counselor': typeof CounselorIndexRoute
+  '/parent': typeof ParentIndexRoute
+  '/student': typeof StudentIndexRoute
   '/teacher': typeof TeacherIndexRoute
   '/admin/students/$id': typeof AdminStudentsIdRoute
 }
@@ -265,11 +406,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
-  '/counselor': typeof CounselorRoute
+  '/counselor': typeof CounselorRouteWithChildren
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
-  '/parent': typeof ParentRoute
-  '/student': typeof StudentRoute
+  '/parent': typeof ParentRouteWithChildren
+  '/student': typeof StudentRouteWithChildren
   '/teacher': typeof TeacherRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/assessments': typeof AdminAssessmentsRoute
@@ -283,6 +424,21 @@ export interface FileRoutesById {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/timetable': typeof AdminTimetableRoute
+  '/counselor/interventions': typeof CounselorInterventionsRoute
+  '/counselor/risk': typeof CounselorRiskRoute
+  '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/students': typeof CounselorStudentsRoute
+  '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/parent/appointments': typeof ParentAppointmentsRoute
+  '/parent/attendance': typeof ParentAttendanceRoute
+  '/parent/grades': typeof ParentGradesRoute
+  '/parent/messages': typeof ParentMessagesRoute
+  '/parent/resources': typeof ParentResourcesRoute
+  '/student/goals': typeof StudentGoalsRoute
+  '/student/grades': typeof StudentGradesRoute
+  '/student/growth': typeof StudentGrowthRoute
+  '/student/mood': typeof StudentMoodRoute
+  '/student/reports': typeof StudentReportsRoute
   '/teacher/ai': typeof TeacherAiRoute
   '/teacher/assessments': typeof TeacherAssessmentsRoute
   '/teacher/attendance': typeof TeacherAttendanceRoute
@@ -292,6 +448,9 @@ export interface FileRoutesById {
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
   '/admin/': typeof AdminIndexRoute
+  '/counselor/': typeof CounselorIndexRoute
+  '/parent/': typeof ParentIndexRoute
+  '/student/': typeof StudentIndexRoute
   '/teacher/': typeof TeacherIndexRoute
   '/admin/students/$id': typeof AdminStudentsIdRoute
 }
@@ -318,6 +477,21 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/students'
     | '/admin/timetable'
+    | '/counselor/interventions'
+    | '/counselor/risk'
+    | '/counselor/sessions'
+    | '/counselor/students'
+    | '/counselor/wellbeing'
+    | '/parent/appointments'
+    | '/parent/attendance'
+    | '/parent/grades'
+    | '/parent/messages'
+    | '/parent/resources'
+    | '/student/goals'
+    | '/student/grades'
+    | '/student/growth'
+    | '/student/mood'
+    | '/student/reports'
     | '/teacher/ai'
     | '/teacher/assessments'
     | '/teacher/attendance'
@@ -327,16 +501,16 @@ export interface FileRouteTypes {
     | '/teacher/observations'
     | '/teacher/reports'
     | '/admin/'
+    | '/counselor/'
+    | '/parent/'
+    | '/student/'
     | '/teacher/'
     | '/admin/students/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/counselor'
     | '/demo'
     | '/login'
-    | '/parent'
-    | '/student'
     | '/admin/analytics'
     | '/admin/assessments'
     | '/admin/attendance'
@@ -349,6 +523,21 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/students'
     | '/admin/timetable'
+    | '/counselor/interventions'
+    | '/counselor/risk'
+    | '/counselor/sessions'
+    | '/counselor/students'
+    | '/counselor/wellbeing'
+    | '/parent/appointments'
+    | '/parent/attendance'
+    | '/parent/grades'
+    | '/parent/messages'
+    | '/parent/resources'
+    | '/student/goals'
+    | '/student/grades'
+    | '/student/growth'
+    | '/student/mood'
+    | '/student/reports'
     | '/teacher/ai'
     | '/teacher/assessments'
     | '/teacher/attendance'
@@ -358,6 +547,9 @@ export interface FileRouteTypes {
     | '/teacher/observations'
     | '/teacher/reports'
     | '/admin'
+    | '/counselor'
+    | '/parent'
+    | '/student'
     | '/teacher'
     | '/admin/students/$id'
   id:
@@ -382,6 +574,21 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/students'
     | '/admin/timetable'
+    | '/counselor/interventions'
+    | '/counselor/risk'
+    | '/counselor/sessions'
+    | '/counselor/students'
+    | '/counselor/wellbeing'
+    | '/parent/appointments'
+    | '/parent/attendance'
+    | '/parent/grades'
+    | '/parent/messages'
+    | '/parent/resources'
+    | '/student/goals'
+    | '/student/grades'
+    | '/student/growth'
+    | '/student/mood'
+    | '/student/reports'
     | '/teacher/ai'
     | '/teacher/assessments'
     | '/teacher/attendance'
@@ -391,6 +598,9 @@ export interface FileRouteTypes {
     | '/teacher/observations'
     | '/teacher/reports'
     | '/admin/'
+    | '/counselor/'
+    | '/parent/'
+    | '/student/'
     | '/teacher/'
     | '/admin/students/$id'
   fileRoutesById: FileRoutesById
@@ -398,11 +608,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
-  CounselorRoute: typeof CounselorRoute
+  CounselorRoute: typeof CounselorRouteWithChildren
   DemoRoute: typeof DemoRoute
   LoginRoute: typeof LoginRoute
-  ParentRoute: typeof ParentRoute
-  StudentRoute: typeof StudentRoute
+  ParentRoute: typeof ParentRouteWithChildren
+  StudentRoute: typeof StudentRouteWithChildren
   TeacherRoute: typeof TeacherRouteWithChildren
 }
 
@@ -471,6 +681,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherIndexRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/student/': {
+      id: '/student/'
+      path: '/'
+      fullPath: '/student/'
+      preLoaderRoute: typeof StudentIndexRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/parent/': {
+      id: '/parent/'
+      path: '/'
+      fullPath: '/parent/'
+      preLoaderRoute: typeof ParentIndexRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/counselor/': {
+      id: '/counselor/'
+      path: '/'
+      fullPath: '/counselor/'
+      preLoaderRoute: typeof CounselorIndexRouteImport
+      parentRoute: typeof CounselorRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -533,6 +764,111 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/ai'
       preLoaderRoute: typeof TeacherAiRouteImport
       parentRoute: typeof TeacherRoute
+    }
+    '/student/reports': {
+      id: '/student/reports'
+      path: '/reports'
+      fullPath: '/student/reports'
+      preLoaderRoute: typeof StudentReportsRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/mood': {
+      id: '/student/mood'
+      path: '/mood'
+      fullPath: '/student/mood'
+      preLoaderRoute: typeof StudentMoodRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/growth': {
+      id: '/student/growth'
+      path: '/growth'
+      fullPath: '/student/growth'
+      preLoaderRoute: typeof StudentGrowthRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/grades': {
+      id: '/student/grades'
+      path: '/grades'
+      fullPath: '/student/grades'
+      preLoaderRoute: typeof StudentGradesRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/goals': {
+      id: '/student/goals'
+      path: '/goals'
+      fullPath: '/student/goals'
+      preLoaderRoute: typeof StudentGoalsRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/parent/resources': {
+      id: '/parent/resources'
+      path: '/resources'
+      fullPath: '/parent/resources'
+      preLoaderRoute: typeof ParentResourcesRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/parent/messages': {
+      id: '/parent/messages'
+      path: '/messages'
+      fullPath: '/parent/messages'
+      preLoaderRoute: typeof ParentMessagesRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/parent/grades': {
+      id: '/parent/grades'
+      path: '/grades'
+      fullPath: '/parent/grades'
+      preLoaderRoute: typeof ParentGradesRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/parent/attendance': {
+      id: '/parent/attendance'
+      path: '/attendance'
+      fullPath: '/parent/attendance'
+      preLoaderRoute: typeof ParentAttendanceRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/parent/appointments': {
+      id: '/parent/appointments'
+      path: '/appointments'
+      fullPath: '/parent/appointments'
+      preLoaderRoute: typeof ParentAppointmentsRouteImport
+      parentRoute: typeof ParentRoute
+    }
+    '/counselor/wellbeing': {
+      id: '/counselor/wellbeing'
+      path: '/wellbeing'
+      fullPath: '/counselor/wellbeing'
+      preLoaderRoute: typeof CounselorWellbeingRouteImport
+      parentRoute: typeof CounselorRoute
+    }
+    '/counselor/students': {
+      id: '/counselor/students'
+      path: '/students'
+      fullPath: '/counselor/students'
+      preLoaderRoute: typeof CounselorStudentsRouteImport
+      parentRoute: typeof CounselorRoute
+    }
+    '/counselor/sessions': {
+      id: '/counselor/sessions'
+      path: '/sessions'
+      fullPath: '/counselor/sessions'
+      preLoaderRoute: typeof CounselorSessionsRouteImport
+      parentRoute: typeof CounselorRoute
+    }
+    '/counselor/risk': {
+      id: '/counselor/risk'
+      path: '/risk'
+      fullPath: '/counselor/risk'
+      preLoaderRoute: typeof CounselorRiskRouteImport
+      parentRoute: typeof CounselorRoute
+    }
+    '/counselor/interventions': {
+      id: '/counselor/interventions'
+      path: '/interventions'
+      fullPath: '/counselor/interventions'
+      preLoaderRoute: typeof CounselorInterventionsRouteImport
+      parentRoute: typeof CounselorRoute
     }
     '/admin/timetable': {
       id: '/admin/timetable'
@@ -674,6 +1010,70 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface CounselorRouteChildren {
+  CounselorInterventionsRoute: typeof CounselorInterventionsRoute
+  CounselorRiskRoute: typeof CounselorRiskRoute
+  CounselorSessionsRoute: typeof CounselorSessionsRoute
+  CounselorStudentsRoute: typeof CounselorStudentsRoute
+  CounselorWellbeingRoute: typeof CounselorWellbeingRoute
+  CounselorIndexRoute: typeof CounselorIndexRoute
+}
+
+const CounselorRouteChildren: CounselorRouteChildren = {
+  CounselorInterventionsRoute: CounselorInterventionsRoute,
+  CounselorRiskRoute: CounselorRiskRoute,
+  CounselorSessionsRoute: CounselorSessionsRoute,
+  CounselorStudentsRoute: CounselorStudentsRoute,
+  CounselorWellbeingRoute: CounselorWellbeingRoute,
+  CounselorIndexRoute: CounselorIndexRoute,
+}
+
+const CounselorRouteWithChildren = CounselorRoute._addFileChildren(
+  CounselorRouteChildren,
+)
+
+interface ParentRouteChildren {
+  ParentAppointmentsRoute: typeof ParentAppointmentsRoute
+  ParentAttendanceRoute: typeof ParentAttendanceRoute
+  ParentGradesRoute: typeof ParentGradesRoute
+  ParentMessagesRoute: typeof ParentMessagesRoute
+  ParentResourcesRoute: typeof ParentResourcesRoute
+  ParentIndexRoute: typeof ParentIndexRoute
+}
+
+const ParentRouteChildren: ParentRouteChildren = {
+  ParentAppointmentsRoute: ParentAppointmentsRoute,
+  ParentAttendanceRoute: ParentAttendanceRoute,
+  ParentGradesRoute: ParentGradesRoute,
+  ParentMessagesRoute: ParentMessagesRoute,
+  ParentResourcesRoute: ParentResourcesRoute,
+  ParentIndexRoute: ParentIndexRoute,
+}
+
+const ParentRouteWithChildren =
+  ParentRoute._addFileChildren(ParentRouteChildren)
+
+interface StudentRouteChildren {
+  StudentGoalsRoute: typeof StudentGoalsRoute
+  StudentGradesRoute: typeof StudentGradesRoute
+  StudentGrowthRoute: typeof StudentGrowthRoute
+  StudentMoodRoute: typeof StudentMoodRoute
+  StudentReportsRoute: typeof StudentReportsRoute
+  StudentIndexRoute: typeof StudentIndexRoute
+}
+
+const StudentRouteChildren: StudentRouteChildren = {
+  StudentGoalsRoute: StudentGoalsRoute,
+  StudentGradesRoute: StudentGradesRoute,
+  StudentGrowthRoute: StudentGrowthRoute,
+  StudentMoodRoute: StudentMoodRoute,
+  StudentReportsRoute: StudentReportsRoute,
+  StudentIndexRoute: StudentIndexRoute,
+}
+
+const StudentRouteWithChildren =
+  StudentRoute._addFileChildren(StudentRouteChildren)
+
 interface TeacherRouteChildren {
   TeacherAiRoute: typeof TeacherAiRoute
   TeacherAssessmentsRoute: typeof TeacherAssessmentsRoute
@@ -704,11 +1104,11 @@ const TeacherRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
-  CounselorRoute: CounselorRoute,
+  CounselorRoute: CounselorRouteWithChildren,
   DemoRoute: DemoRoute,
   LoginRoute: LoginRoute,
-  ParentRoute: ParentRoute,
-  StudentRoute: StudentRoute,
+  ParentRoute: ParentRouteWithChildren,
+  StudentRoute: StudentRouteWithChildren,
   TeacherRoute: TeacherRouteWithChildren,
 }
 export const routeTree = rootRouteImport
