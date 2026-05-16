@@ -41,6 +41,7 @@ import { Route as ParentMessagesRouteImport } from './routes/parent.messages'
 import { Route as ParentGradesRouteImport } from './routes/parent.grades'
 import { Route as ParentAttendanceRouteImport } from './routes/parent.attendance'
 import { Route as ParentAppointmentsRouteImport } from './routes/parent.appointments'
+import { Route as JoinCodeRouteImport } from './routes/join.$code'
 import { Route as CounselorWellbeingRouteImport } from './routes/counselor.wellbeing'
 import { Route as CounselorStudentsRouteImport } from './routes/counselor.students'
 import { Route as CounselorSessionsRouteImport } from './routes/counselor.sessions'
@@ -51,6 +52,7 @@ import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminGradesRouteImport } from './routes/admin.grades'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
@@ -220,6 +222,11 @@ const ParentAppointmentsRoute = ParentAppointmentsRouteImport.update({
   path: '/appointments',
   getParentRoute: () => ParentRoute,
 } as any)
+const JoinCodeRoute = JoinCodeRouteImport.update({
+  id: '/join/$code',
+  path: '/join/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CounselorWellbeingRoute = CounselorWellbeingRouteImport.update({
   id: '/wellbeing',
   path: '/wellbeing',
@@ -268,6 +275,11 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
 const AdminReportsRoute = AdminReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInvitationsRoute = AdminInvitationsRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminGradesRoute = AdminGradesRouteImport.update({
@@ -328,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -338,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/counselor/sessions': typeof CounselorSessionsRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/join/$code': typeof JoinCodeRoute
   '/parent/appointments': typeof ParentAppointmentsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/grades': typeof ParentGradesRoute
@@ -375,6 +389,7 @@ export interface FileRoutesByTo {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -385,6 +400,7 @@ export interface FileRoutesByTo {
   '/counselor/sessions': typeof CounselorSessionsRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/join/$code': typeof JoinCodeRoute
   '/parent/appointments': typeof ParentAppointmentsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/grades': typeof ParentGradesRoute
@@ -428,6 +444,7 @@ export interface FileRoutesById {
   '/admin/curriculum': typeof AdminCurriculumRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
+  '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -438,6 +455,7 @@ export interface FileRoutesById {
   '/counselor/sessions': typeof CounselorSessionsRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
+  '/join/$code': typeof JoinCodeRoute
   '/parent/appointments': typeof ParentAppointmentsRoute
   '/parent/attendance': typeof ParentAttendanceRoute
   '/parent/grades': typeof ParentGradesRoute
@@ -482,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/finance'
     | '/admin/grades'
+    | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
@@ -492,6 +511,7 @@ export interface FileRouteTypes {
     | '/counselor/sessions'
     | '/counselor/students'
     | '/counselor/wellbeing'
+    | '/join/$code'
     | '/parent/appointments'
     | '/parent/attendance'
     | '/parent/grades'
@@ -529,6 +549,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/finance'
     | '/admin/grades'
+    | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
@@ -539,6 +560,7 @@ export interface FileRouteTypes {
     | '/counselor/sessions'
     | '/counselor/students'
     | '/counselor/wellbeing'
+    | '/join/$code'
     | '/parent/appointments'
     | '/parent/attendance'
     | '/parent/grades'
@@ -581,6 +603,7 @@ export interface FileRouteTypes {
     | '/admin/curriculum'
     | '/admin/finance'
     | '/admin/grades'
+    | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/staff'
@@ -591,6 +614,7 @@ export interface FileRouteTypes {
     | '/counselor/sessions'
     | '/counselor/students'
     | '/counselor/wellbeing'
+    | '/join/$code'
     | '/parent/appointments'
     | '/parent/attendance'
     | '/parent/grades'
@@ -627,6 +651,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   StudentRoute: typeof StudentRouteWithChildren
   TeacherRoute: typeof TeacherRouteWithChildren
+  JoinCodeRoute: typeof JoinCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -855,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParentAppointmentsRouteImport
       parentRoute: typeof ParentRoute
     }
+    '/join/$code': {
+      id: '/join/$code'
+      path: '/join/$code'
+      fullPath: '/join/$code'
+      preLoaderRoute: typeof JoinCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/counselor/wellbeing': {
       id: '/counselor/wellbeing'
       path: '/wellbeing'
@@ -923,6 +955,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/admin/reports'
       preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/invitations': {
+      id: '/admin/invitations'
+      path: '/invitations'
+      fullPath: '/admin/invitations'
+      preLoaderRoute: typeof AdminInvitationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/grades': {
@@ -1004,6 +1043,7 @@ interface AdminRouteChildren {
   AdminCurriculumRoute: typeof AdminCurriculumRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminGradesRoute: typeof AdminGradesRoute
+  AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
@@ -1020,6 +1060,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCurriculumRoute: AdminCurriculumRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminGradesRoute: AdminGradesRoute,
+  AdminInvitationsRoute: AdminInvitationsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
@@ -1131,6 +1172,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   StudentRoute: StudentRouteWithChildren,
   TeacherRoute: TeacherRouteWithChildren,
+  JoinCodeRoute: JoinCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
