@@ -21,6 +21,7 @@ function AdminDashboard() {
 function LiveAdmin() {
   const fn = useServerFn(getAdminDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["admin-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["counselor_flags", "grades", "attendance"], [["admin-dash"]]);
   const trialDays = data?.school?.trial_expires_at
     ? Math.max(0, Math.ceil((new Date(data.school.trial_expires_at).getTime() - Date.now()) / 86400000))
     : null;
