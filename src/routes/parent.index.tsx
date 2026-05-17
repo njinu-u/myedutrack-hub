@@ -19,6 +19,7 @@ function ParentHome() {
 function LiveParent() {
   const fn = useServerFn(getParentDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["parent-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["grades", "attendance", "messages"], [["parent-dash"]]);
 
   if (isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
 
