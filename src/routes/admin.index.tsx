@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { KPI, AI_INSIGHTS, ATTENDANCE_TREND, PROJECTIONS, STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getAdminDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { Activity, ArrowRight, Sparkles, FileText, Plus, Users, AlertTriangle, Mail } from "lucide-react";
 
