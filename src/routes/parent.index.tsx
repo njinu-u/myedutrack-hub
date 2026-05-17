@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { KOFI } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getParentDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Calendar, MessageCircle, FileText, GraduationCap, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/parent/")({ component: ParentHome });
