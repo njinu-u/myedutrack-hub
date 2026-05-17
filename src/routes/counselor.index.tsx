@@ -19,6 +19,7 @@ function Dash() {
 function LiveCounselor() {
   const fn = useServerFn(getCounselorDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["counselor-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["counselor_flags", "mood_checkins"], [["counselor-dash"]]);
   return (
     <div className="space-y-6">
       <PageHead title="Wellbeing dashboard" subtitle="Live view across your school" />
