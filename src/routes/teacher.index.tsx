@@ -1,15 +1,66 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { Card, PageHead, Stat } from "@/components/portal-layout";
 import { AIBlock } from "@/components/ai-block";
 import { TODAY_TIMETABLE, PARENT_MESSAGES, STUDENTS } from "@/lib/mock-data";
-import { CalendarCheck, GraduationCap, BookMarked, MessageSquare } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { getTeacherDashboard } from "@/lib/dashboards.functions";
+import { CalendarCheck, BookMarked, MessageSquare, Notebook } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/")({ component: Dash });
 
 function Dash() {
+  const auth = useAuth();
+  return auth.isAuthed ? <LiveTeacher /> : <DemoTeacher />;
+}
+
+function LiveTeacher() {
+  const fn = useServerFn(getTeacherDashboard);
+  const { data, isLoading } = useQuery({ queryKey: ["teacher-dash"], queryFn: () => fn() });
+  const auth = useAuth();
   return (
     <div className="space-y-6">
-      <PageHead title="Good morning, Ms. Odhiambo." subtitle="3 classes today · 2 grade entries due Friday · 2 unread parent messages" />
+      <PageHead title={`Welcome${auth.appUser?.full_name ? ", " + auth.appUser.full_name : ""}`} subtitle="Your teaching dashboard" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 stagger">
+        <Stat label="Observations logged" value={isLoading ? "…" : data?.observationsCount ?? 0} />
+        <Stat label="Unread messages" value={isLoading ? "…" : data?.unreadMessages ?? 0} tone={(data?.unreadMessages ?? 0) > 0 ? "warn" : "default"} />
+        <Stat label="This week" value={(data?.recentObs ?? []).filter((o: any) => new Date(o.created_at).getTime() > Date.now() - 7 * 86400000).length} />
+      </div>
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl flex items-center gap-2"><Notebook className="h-4 w-4 text-teal" />Recent observations</h2>
+          <Link to="/teacher/observations" className="text-xs text-teal">Add observation →</Link>
+        </div>
+        {isLoading ? <div className="text-sm text-muted-foreground mt-3">Loading…</div> :
+          (data?.recentObs ?? []).length === 0 ? (
+            <div className="text-center py-10">
+              <div className="h-12 w-12 mx-auto rounded-2xl bg-secondary grid place-items-center"><Notebook className="h-6 w-6 text-muted-foreground" /></div>
+              <div className="font-display text-lg mt-3">No observations yet</div>
+              <div className="text-sm text-muted-foreground mt-1">Log your first student observation to get AI-generated next-step suggestions.</div>
+              <Link to="/teacher/observations" className="inline-block mt-4 px-4 py-2 rounded-full bg-navy text-white text-sm">Start observing</Link>
+            </div>
+          ) : (
+            <ul className="mt-4 space-y-2">
+              {data!.recentObs.map((o: any) => (
+                <li key={o.id} className="p-3 rounded-xl border">
+                  <div className="text-xs text-muted-foreground">{o.subject || "Observation"} · {new Date(o.created_at).toLocaleDateString()}</div>
+                  <div className="text-sm mt-1 line-clamp-2">{o.note}</div>
+                  {o.tags?.length > 0 && <div className="flex gap-1 mt-2">{o.tags.map((t: string) => <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-secondary">{t}</span>)}</div>}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </Card>
+    </div>
+  );
+}
+
+function DemoTeacher() {
+  return (
+    <div className="space-y-6">
+      <PageHead title="Good morning, Ms. Odhiambo." subtitle="3 classes today · 2 grade entries due Friday · 2 unread parent messages · Demo data" />
       <AIBlock title="Your day at a glance" tone="info">Class 7B Math at 8:00 — 2 students flagged: Kofi (declining 3 wks), Diego (urgent). Suggested 5-min check-in with each before lesson.</AIBlock>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger">
         <Stat label="Classes today" value="3" />
@@ -51,7 +102,6 @@ function Dash() {
               </li>
             ))}
           </ul>
-          <Link to="/teacher/messages" className="mt-3 block text-center text-xs text-teal">All messages →</Link>
         </Card>
       </div>
     </div>
