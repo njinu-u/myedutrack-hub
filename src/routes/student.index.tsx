@@ -18,6 +18,7 @@ function StudentDash() {
 function LiveStudent() {
   const fn = useServerFn(getStudentDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["student-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["grades", "mood_checkins"], [["student-dash"]]);
   const firstName = (data?.fullName ?? "there").split(" ")[0];
   const moodEmoji = data?.recentMood ? ["😢","😟","😐","🙂","😊"][Math.max(0, Math.min(4, data.recentMood.mood - 1))] : "✨";
 
