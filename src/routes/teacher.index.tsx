@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { TODAY_TIMETABLE, PARENT_MESSAGES, STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getTeacherDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { CalendarCheck, BookMarked, MessageSquare, Notebook } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/")({ component: Dash });
@@ -18,6 +19,7 @@ function Dash() {
 function LiveTeacher() {
   const fn = useServerFn(getTeacherDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["teacher-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["observations", "messages", "grades", "attendance"], [["teacher-dash"]]);
   const auth = useAuth();
   return (
     <div className="space-y-6">

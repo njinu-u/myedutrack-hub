@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { KPI, AI_INSIGHTS, ATTENDANCE_TREND, PROJECTIONS, STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getAdminDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
 import { Activity, ArrowRight, Sparkles, FileText, Plus, Users, AlertTriangle, Mail } from "lucide-react";
 
@@ -20,6 +21,7 @@ function AdminDashboard() {
 function LiveAdmin() {
   const fn = useServerFn(getAdminDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["admin-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["counselor_flags", "grades", "attendance"], [["admin-dash"]]);
   const trialDays = data?.school?.trial_expires_at
     ? Math.max(0, Math.ceil((new Date(data.school.trial_expires_at).getTime() - Date.now()) / 86400000))
     : null;

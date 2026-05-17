@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getCounselorDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Heart } from "lucide-react";
 
 export const Route = createFileRoute("/counselor/")({ component: Dash });
@@ -18,6 +19,7 @@ function Dash() {
 function LiveCounselor() {
   const fn = useServerFn(getCounselorDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["counselor-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["counselor_flags", "mood_checkins"], [["counselor-dash"]]);
   return (
     <div className="space-y-6">
       <PageHead title="Wellbeing dashboard" subtitle="Live view across your school" />
