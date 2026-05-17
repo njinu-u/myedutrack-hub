@@ -5,6 +5,7 @@ import { Card } from "@/components/portal-layout";
 import { KOFI } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getStudentDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Flame, Sparkles, BookOpen } from "lucide-react";
 
 export const Route = createFileRoute("/student/")({ component: StudentDash });
