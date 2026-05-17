@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getCounselorDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Heart } from "lucide-react";
 
 export const Route = createFileRoute("/counselor/")({ component: Dash });
