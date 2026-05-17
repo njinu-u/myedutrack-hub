@@ -19,6 +19,7 @@ function Dash() {
 function LiveTeacher() {
   const fn = useServerFn(getTeacherDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["teacher-dash"], queryFn: () => fn() });
+  useRealtimeInvalidate(["observations", "messages", "grades", "attendance"], [["teacher-dash"]]);
   const auth = useAuth();
   return (
     <div className="space-y-6">
