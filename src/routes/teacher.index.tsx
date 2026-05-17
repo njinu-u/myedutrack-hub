@@ -6,6 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { TODAY_TIMETABLE, PARENT_MESSAGES, STUDENTS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getTeacherDashboard } from "@/lib/dashboards.functions";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { CalendarCheck, BookMarked, MessageSquare, Notebook } from "lucide-react";
 
 export const Route = createFileRoute("/teacher/")({ component: Dash });
