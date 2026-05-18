@@ -105,7 +105,7 @@ function StudentsPage() {
           return;
         }
         const rows: CsvRow[] = results.data
-          .map((raw) => {
+          .map((raw): CsvRow | null => {
             const norm: Record<string, string> = {};
             Object.entries(raw).forEach(([k, v]) => { norm[k.trim().toLowerCase()] = (v ?? "").toString().trim(); });
             const full_name = norm[nameKey];
