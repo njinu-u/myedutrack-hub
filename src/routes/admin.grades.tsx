@@ -4,6 +4,7 @@ import { AIBlock } from "@/components/ai-block";
 import { STUDENTS } from "@/lib/mock-data";
 import { Lock, Save, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/grades")({
   component: Grades,
