@@ -41,8 +41,8 @@ function Reports() {
               <h2 className="font-display text-2xl">Kofi Mensah · Term 2 Report</h2>
             </div>
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5"><Languages className="h-3.5 w-3.5" />English</button>
-              <button className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5"><Send className="h-3.5 w-3.5" />Send to parent</button>
+              <button onClick={() => setLangIdx((i) => (i + 1) % LANGS.length)} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 hover:bg-secondary/70"><Languages className="h-3.5 w-3.5" />{LANGS[langIdx]}</button>
+              <button onClick={send} disabled={sending} className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5 disabled:opacity-60"><Send className="h-3.5 w-3.5" />{sending ? "Sending…" : "Send to parent"}</button>
             </div>
           </div>
           <div className="mt-5 p-6 rounded-2xl bg-secondary/40 font-serif text-foreground/85 leading-relaxed text-[17px] whitespace-pre-line">
