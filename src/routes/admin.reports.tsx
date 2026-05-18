@@ -16,7 +16,15 @@ Mathematics has been the focal challenge of the term. Three consecutive assessme
 Socially and emotionally, Kofi is settling in well. His mood check-ins show steady positivity, and he has built strong friendships within 7B. We recommend a brief at-home conversation about how he's experiencing math class, and continued use of the practice resources we've shared.`;
 
 function Reports() {
-  return (
+  const LANGS = ["English","French","Mandarin","Swahili","Arabic","Hindi","Spanish"];
+  const [langIdx, setLangIdx] = useState(0);
+  const [sending, setSending] = useState(false);
+  const send = async () => {
+    setSending(true);
+    await new Promise((r) => setTimeout(r, 700));
+    setSending(false);
+    toast.success(`Report sent to parent in ${LANGS[langIdx]}`);
+  };
     <div className="space-y-6">
       <PageHead title="Reports" subtitle="AI-drafted · teacher-refined · auto-translated · delivered to parents in their language." />
 
