@@ -25,6 +25,7 @@ function Reports() {
     setSending(false);
     toast.success(`Report sent to parent in ${LANGS[langIdx]}`);
   };
+  return (
     <div className="space-y-6">
       <PageHead title="Reports" subtitle="AI-drafted · teacher-refined · auto-translated · delivered to parents in their language." />
 
