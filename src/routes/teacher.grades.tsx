@@ -2,15 +2,28 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { AIBlock } from "@/components/ai-block";
 import { STUDENTS } from "@/lib/mock-data";
-import { Save } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
 function TeacherGrades() {
+  const [saving, setSaving] = useState(false);
+  const submit = async () => {
+    setSaving(true);
+    await new Promise((r) => setTimeout(r, 600));
+    setSaving(false);
+    toast.success("Grades submitted for review");
+  };
   return (
     <div className="space-y-6">
-      <PageHead title="Grade entry · Math · 7B · Unit 4 Test" subtitle="Auto-saves as you type. Submit for review when complete." actions={<button className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2"><Save className="h-4 w-4" />Submit for review</button>} />
+      <PageHead title="Grade entry · Math · 7B · Unit 4 Test" subtitle="Auto-saves as you type. Submit for review when complete." actions={
+        <button onClick={submit} disabled={saving} className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2 items-center disabled:opacity-60">
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}{saving ? "Submitting…" : "Submit for review"}
+        </button>
+      } />
       <Card>
         <table className="w-full text-sm">
           <thead><tr className="text-xs uppercase tracking-wider text-muted-foreground border-b"><th className="text-left py-3">Student</th><th className="text-center">Score / 100</th><th className="text-center">Notes</th></tr></thead>

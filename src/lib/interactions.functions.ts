@@ -1,0 +1,51 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export const bookAppointment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      teacher_user_id: z.string().uuid(),
+      student_id: z.string().uuid(),
+      scheduled_at: z.string().datetime(),
+      notes: z.string().max(1000).optional().nullable(),
+    }).parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: appUser } = await supabase.from("app_users").select("school_id").maybeSingle();
+    if (!appUser?.school_id) throw new Error("No school");
+    const { error } = await supabase.from("appointments").insert({
+      teacher_user_id: data.teacher_user_id,
+      student_id: data.student_id,
+      scheduled_at: data.scheduled_at,
+      notes: data.notes ?? null,
+      school_id: appUser.school_id,
+      parent_user_id: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const submitMoodCheckin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      mood: z.number().int().min(1).max(5),
+      note: z.string().max(500).optional().nullable(),
+    }).parse(input)
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: appUser } = await supabase.from("app_users").select("school_id,linked_student_id").maybeSingle();
+    if (!appUser?.school_id || !appUser.linked_student_id) throw new Error("No linked student");
+    const { error } = await supabase.from("mood_checkins").insert({
+      mood: data.mood,
+      note: data.note ?? null,
+      school_id: appUser.school_id,
+      student_id: appUser.linked_student_id,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });

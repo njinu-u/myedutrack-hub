@@ -4,6 +4,7 @@ import { AIBlock } from "@/components/ai-block";
 import { STUDENTS } from "@/lib/mock-data";
 import { Lock, Save, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/grades")({
   component: Grades,
@@ -21,9 +22,9 @@ function Grades() {
     <div className="space-y-6">
       <PageHead title="Grade Management" subtitle="Central filing system: every grade, every student, every assessment. Locked, audited, AI-anomaly-checked." actions={
         <>
-          <button className="px-4 py-2 rounded-full text-sm bg-secondary inline-flex gap-2 items-center"><Upload className="h-4 w-4" />Import CSV</button>
-          <button className="px-4 py-2 rounded-full text-sm bg-amber text-navy inline-flex gap-2 items-center"><Lock className="h-4 w-4" />Lock period</button>
-          <button className="px-4 py-2 rounded-full text-sm bg-navy text-white inline-flex gap-2 items-center"><Save className="h-4 w-4" />Save changes</button>
+          <button onClick={() => toast.info("CSV import — pick a file from the Students module → Import CSV.")} className="px-4 py-2 rounded-full text-sm bg-secondary inline-flex gap-2 items-center"><Upload className="h-4 w-4" />Import CSV</button>
+          <button onClick={() => toast.success("Grade period locked · changes require admin override")} className="px-4 py-2 rounded-full text-sm bg-amber text-navy inline-flex gap-2 items-center"><Lock className="h-4 w-4" />Lock period</button>
+          <button onClick={() => toast.success("All grade changes saved")} className="px-4 py-2 rounded-full text-sm bg-navy text-white inline-flex gap-2 items-center"><Save className="h-4 w-4" />Save changes</button>
         </>
       } />
 

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { AIBlock } from "@/components/ai-block";
 import { Send, Languages, FileText, Check } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export const Route = createFileRoute("/admin/reports")({
   component: Reports,
@@ -14,6 +16,15 @@ Mathematics has been the focal challenge of the term. Three consecutive assessme
 Socially and emotionally, Kofi is settling in well. His mood check-ins show steady positivity, and he has built strong friendships within 7B. We recommend a brief at-home conversation about how he's experiencing math class, and continued use of the practice resources we've shared.`;
 
 function Reports() {
+  const LANGS = ["English","French","Mandarin","Swahili","Arabic","Hindi","Spanish"];
+  const [langIdx, setLangIdx] = useState(0);
+  const [sending, setSending] = useState(false);
+  const send = async () => {
+    setSending(true);
+    await new Promise((r) => setTimeout(r, 700));
+    setSending(false);
+    toast.success(`Report sent to parent in ${LANGS[langIdx]}`);
+  };
   return (
     <div className="space-y-6">
       <PageHead title="Reports" subtitle="AI-drafted · teacher-refined · auto-translated · delivered to parents in their language." />
@@ -30,8 +41,8 @@ function Reports() {
               <h2 className="font-display text-2xl">Kofi Mensah · Term 2 Report</h2>
             </div>
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5"><Languages className="h-3.5 w-3.5" />English</button>
-              <button className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5"><Send className="h-3.5 w-3.5" />Send to parent</button>
+              <button onClick={() => setLangIdx((i) => (i + 1) % LANGS.length)} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 hover:bg-secondary/70"><Languages className="h-3.5 w-3.5" />{LANGS[langIdx]}</button>
+              <button onClick={send} disabled={sending} className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5 disabled:opacity-60"><Send className="h-3.5 w-3.5" />{sending ? "Sending…" : "Send to parent"}</button>
             </div>
           </div>
           <div className="mt-5 p-6 rounded-2xl bg-secondary/40 font-serif text-foreground/85 leading-relaxed text-[17px] whitespace-pre-line">
