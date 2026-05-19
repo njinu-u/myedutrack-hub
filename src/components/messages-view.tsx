@@ -30,7 +30,7 @@ function RealMessages({ title, subtitle }: { title: string; subtitle: string }) 
   const [to, setTo] = useState<string | null>(null);
   const [body, setBody] = useState("");
 
-  useRealtimeInvalidate([{ table: "messages", queryKey: ["msg-thread"] }]);
+  useRealtimeInvalidate(["messages"], [["msg-thread", to ?? ""]]);
 
   const users = useQuery({ queryKey: ["msg-users"], queryFn: () => fetchUsers() });
   const thread = useQuery({
