@@ -20,11 +20,37 @@ function Reports() {
   const LANGS = ["English","French","Mandarin","Swahili","Arabic","Hindi","Spanish"];
   const [langIdx, setLangIdx] = useState(0);
   const [sending, setSending] = useState(false);
+  const [exporting, setExporting] = useState<null | "pdf" | "csv">(null);
   const send = async () => {
     setSending(true);
     await new Promise((r) => setTimeout(r, 700));
     setSending(false);
     toast.success(`Report sent to parent in ${LANGS[langIdx]}`);
+  };
+  const exportPdf = async () => {
+    setExporting("pdf");
+    try {
+      downloadPdf("kofi-mensah-term-2", "Kofi Mensah · Term 2 Report", [
+        { type: "heading", text: `Language: ${LANGS[langIdx]}` },
+        { type: "paragraph", text: SAMPLE },
+      ]);
+      toast.success("PDF downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setExporting(null); }
+  };
+  const exportCsv = async () => {
+    setExporting("csv");
+    try {
+      downloadCsv("delivery-status", [
+        { name: "Amara Okeke", status: "Delivered · read" },
+        { name: "Liam Chen", status: "Delivered (Mandarin)" },
+        { name: "Priya Sharma", status: "Pending review" },
+        { name: "Zara Al-Mansour", status: "Translating (Arabic)" },
+        { name: "Diego Alvarez", status: "Awaiting counselor input" },
+      ]);
+      toast.success("CSV downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setExporting(null); }
   };
   return (
     <div className="space-y-6">
