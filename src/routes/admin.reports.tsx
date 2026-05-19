@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { AIBlock } from "@/components/ai-block";
-import { Send, Languages, FileText, Check } from "lucide-react";
+import { Send, Languages, FileText, Check, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { downloadPdf, downloadCsv } from "@/lib/export";
 
 export const Route = createFileRoute("/admin/reports")({
   component: Reports,
@@ -19,11 +20,37 @@ function Reports() {
   const LANGS = ["English","French","Mandarin","Swahili","Arabic","Hindi","Spanish"];
   const [langIdx, setLangIdx] = useState(0);
   const [sending, setSending] = useState(false);
+  const [exporting, setExporting] = useState<null | "pdf" | "csv">(null);
   const send = async () => {
     setSending(true);
     await new Promise((r) => setTimeout(r, 700));
     setSending(false);
     toast.success(`Report sent to parent in ${LANGS[langIdx]}`);
+  };
+  const exportPdf = async () => {
+    setExporting("pdf");
+    try {
+      downloadPdf("kofi-mensah-term-2", "Kofi Mensah · Term 2 Report", [
+        { type: "heading", text: `Language: ${LANGS[langIdx]}` },
+        { type: "paragraph", text: SAMPLE },
+      ]);
+      toast.success("PDF downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setExporting(null); }
+  };
+  const exportCsv = async () => {
+    setExporting("csv");
+    try {
+      downloadCsv("delivery-status", [
+        { name: "Amara Okeke", status: "Delivered · read" },
+        { name: "Liam Chen", status: "Delivered (Mandarin)" },
+        { name: "Priya Sharma", status: "Pending review" },
+        { name: "Zara Al-Mansour", status: "Translating (Arabic)" },
+        { name: "Diego Alvarez", status: "Awaiting counselor input" },
+      ]);
+      toast.success("CSV downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setExporting(null); }
   };
   return (
     <div className="space-y-6">
@@ -40,8 +67,10 @@ function Reports() {
               <div className="text-xs uppercase tracking-wider text-teal">Draft preview</div>
               <h2 className="font-display text-2xl">Kofi Mensah · Term 2 Report</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button onClick={() => setLangIdx((i) => (i + 1) % LANGS.length)} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 hover:bg-secondary/70"><Languages className="h-3.5 w-3.5" />{LANGS[langIdx]}</button>
+              <button onClick={exportPdf} disabled={exporting !== null} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 disabled:opacity-60">{exporting === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}Export PDF</button>
+              <button onClick={exportCsv} disabled={exporting !== null} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 disabled:opacity-60">{exporting === "csv" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}Export CSV</button>
               <button onClick={send} disabled={sending} className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5 disabled:opacity-60"><Send className="h-3.5 w-3.5" />{sending ? "Sending…" : "Send to parent"}</button>
             </div>
           </div>

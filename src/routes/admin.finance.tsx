@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead, Stat } from "@/components/portal-layout";
-import { Download, Send, Building2 } from "lucide-react";
+import { Download, Send, Building2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { downloadPdf } from "@/lib/export";
 
 export const Route = createFileRoute("/admin/finance")({
   component: Finance,
@@ -9,6 +12,27 @@ export const Route = createFileRoute("/admin/finance")({
 function Finance() {
   const studentCount = 482;
   const annual = studentCount * 12;
+  const [busy, setBusy] = useState<null | "pdf" | "email">(null);
+  const downloadInvoice = async () => {
+    setBusy("pdf");
+    try {
+      downloadPdf(`invoice-INV-2026-014`, "EduTrack International — Annual Subscription", [
+        { type: "heading", text: "Invoice #INV-2026-014" },
+        { type: "table", head: ["Item", "Qty", "Unit", "Total"], body: [
+          ["Annual subscription", String(studentCount), "$12.00", `$${annual.toLocaleString()}`],
+        ]},
+        { type: "paragraph", text: "Period: Sep 2026 – Aug 2027\nPay to: Standard Chartered Bank Kenya · SWIFT: SCBLKENX" },
+      ]);
+      toast.success("Invoice PDF downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
+  };
+  const emailInvoice = async () => {
+    setBusy("email");
+    await new Promise((r) => setTimeout(r, 600));
+    setBusy(null);
+    toast.success("Invoice emailed to bursar@riverside.ke");
+  };
   return (
     <div className="space-y-6">
       <PageHead title="Finance" subtitle="Invoice generation, fee tracking, automated reminders — built around the $12/student/year model." />
@@ -52,8 +76,8 @@ function Finance() {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button className="px-4 py-2 rounded-full bg-secondary text-sm inline-flex gap-2"><Download className="h-4 w-4" />Download PDF</button>
-            <button className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2"><Send className="h-4 w-4" />Email invoice</button>
+            <button onClick={downloadInvoice} disabled={busy !== null} className="px-4 py-2 rounded-full bg-secondary text-sm inline-flex gap-2 disabled:opacity-60">{busy === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download PDF</button>
+            <button onClick={emailInvoice} disabled={busy !== null} className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2 disabled:opacity-60">{busy === "email" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Email invoice</button>
           </div>
         </Card>
 
