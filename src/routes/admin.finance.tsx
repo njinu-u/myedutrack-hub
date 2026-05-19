@@ -12,6 +12,27 @@ export const Route = createFileRoute("/admin/finance")({
 function Finance() {
   const studentCount = 482;
   const annual = studentCount * 12;
+  const [busy, setBusy] = useState<null | "pdf" | "email">(null);
+  const downloadInvoice = async () => {
+    setBusy("pdf");
+    try {
+      downloadPdf(`invoice-INV-2026-014`, "EduTrack International — Annual Subscription", [
+        { type: "heading", text: "Invoice #INV-2026-014" },
+        { type: "table", head: ["Item", "Qty", "Unit", "Total"], body: [
+          ["Annual subscription", String(studentCount), "$12.00", `$${annual.toLocaleString()}`],
+        ]},
+        { type: "paragraph", text: "Period: Sep 2026 – Aug 2027\nPay to: Standard Chartered Bank Kenya · SWIFT: SCBLKENX" },
+      ]);
+      toast.success("Invoice PDF downloaded");
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setBusy(null); }
+  };
+  const emailInvoice = async () => {
+    setBusy("email");
+    await new Promise((r) => setTimeout(r, 600));
+    setBusy(null);
+    toast.success("Invoice emailed to bursar@riverside.ke");
+  };
   return (
     <div className="space-y-6">
       <PageHead title="Finance" subtitle="Invoice generation, fee tracking, automated reminders — built around the $12/student/year model." />
