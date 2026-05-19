@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const StatusEnum = z.enum(["present", "absent", "late", "excused"]);
+const StatusEnum = z.enum(["present", "absent", "late"]);
 
 export const listAttendanceForDate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
