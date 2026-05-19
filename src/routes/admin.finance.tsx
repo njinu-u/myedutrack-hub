@@ -76,8 +76,8 @@ function Finance() {
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
-            <button className="px-4 py-2 rounded-full bg-secondary text-sm inline-flex gap-2"><Download className="h-4 w-4" />Download PDF</button>
-            <button className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2"><Send className="h-4 w-4" />Email invoice</button>
+            <button onClick={downloadInvoice} disabled={busy !== null} className="px-4 py-2 rounded-full bg-secondary text-sm inline-flex gap-2 disabled:opacity-60">{busy === "pdf" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}Download PDF</button>
+            <button onClick={emailInvoice} disabled={busy !== null} className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex gap-2 disabled:opacity-60">{busy === "email" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}Email invoice</button>
           </div>
         </Card>
 
