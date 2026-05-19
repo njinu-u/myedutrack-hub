@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { AIBlock } from "@/components/ai-block";
-import { Send, Languages, FileText, Check } from "lucide-react";
+import { Send, Languages, FileText, Check, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { downloadPdf, downloadCsv } from "@/lib/export";
 
 export const Route = createFileRoute("/admin/reports")({
   component: Reports,
