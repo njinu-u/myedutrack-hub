@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ModulePage } from "@/components/module-page";
-const m = (title: string, sections: any[]) => () => <ModulePage title={title} sections={sections} />;
-export const Route = createFileRoute("/teacher/messages")({ component: m("Parent Messages", [
-  { title: "Threaded conversations", body: "One thread per student; AI suggests replies; auto-translated." },
-  { title: "Drafting assistant", body: "Ask AI: 'Draft a message about Kofi's math grade' — refine and send." },
-  { title: "Read receipts", body: "Know when a parent has seen your message." },
-])});
+import { MessagesView } from "@/components/messages-view";
+
+export const Route = createFileRoute("/teacher/messages")({
+  component: () => (
+    <MessagesView
+      title="Parent Messages"
+      subtitle="Threaded conversations · auto-translated · read receipts."
+      demoBody={
+        <div className="text-sm text-muted-foreground">
+          Demo preview. Sign in to message real parents — threads, AI-suggested replies, and translation will use your school's contacts.
+        </div>
+      }
+    />
+  ),
+});
