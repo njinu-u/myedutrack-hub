@@ -67,8 +67,10 @@ function Reports() {
               <div className="text-xs uppercase tracking-wider text-teal">Draft preview</div>
               <h2 className="font-display text-2xl">Kofi Mensah · Term 2 Report</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <button onClick={() => setLangIdx((i) => (i + 1) % LANGS.length)} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 hover:bg-secondary/70"><Languages className="h-3.5 w-3.5" />{LANGS[langIdx]}</button>
+              <button onClick={exportPdf} disabled={exporting !== null} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 disabled:opacity-60">{exporting === "pdf" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}Export PDF</button>
+              <button onClick={exportCsv} disabled={exporting !== null} className="px-3 py-1.5 rounded-full bg-secondary text-xs inline-flex gap-1.5 disabled:opacity-60">{exporting === "csv" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}Export CSV</button>
               <button onClick={send} disabled={sending} className="px-3 py-1.5 rounded-full bg-navy text-white text-xs inline-flex gap-1.5 disabled:opacity-60"><Send className="h-3.5 w-3.5" />{sending ? "Sending…" : "Send to parent"}</button>
             </div>
           </div>
