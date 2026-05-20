@@ -506,8 +506,11 @@ export type Database = {
           expires_at: string
           id: string
           linked_student_id: string | null
+          name: string | null
           role: Database["public"]["Enums"]["app_role"]
           school_id: string
+          status: string
+          token: string
           used_at: string | null
         }
         Insert: {
@@ -517,8 +520,11 @@ export type Database = {
           expires_at?: string
           id?: string
           linked_student_id?: string | null
+          name?: string | null
           role: Database["public"]["Enums"]["app_role"]
           school_id: string
+          status?: string
+          token?: string
           used_at?: string | null
         }
         Update: {
@@ -528,8 +534,11 @@ export type Database = {
           expires_at?: string
           id?: string
           linked_student_id?: string | null
+          name?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           school_id?: string
+          status?: string
+          token?: string
           used_at?: string | null
         }
         Relationships: [
