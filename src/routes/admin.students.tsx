@@ -55,13 +55,51 @@ function StudentsPage() {
   const [newName, setNewName] = useState("");
   const [newGrade, setNewGrade] = useState("");
   const [newClass, setNewClass] = useState("");
+  const [parentEmail, setParentEmail] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
 
   const addMut = useMutation({
-    mutationFn: () => addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const created = await addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } });
+      const studentId = created.id;
+      const followups: Array<{ kind: "parent" | "student"; payload: Awaited<ReturnType<typeof invite>> }> = [];
+      if (parentEmail.trim()) {
+        const res = await invite({
+          data: { role: "parent", name: `Parent of ${newName.trim()}`, email: parentEmail.trim(), linked_student_id: studentId },
+        });
+        followups.push({ kind: "parent", payload: res });
+      }
+      if (studentEmail.trim()) {
+        const res = await invite({
+          data: { role: "student", name: newName.trim(), email: studentEmail.trim(), linked_student_id: studentId },
+        });
+        followups.push({ kind: "student", payload: res });
+      }
+      return { followups, studentName: newName.trim() };
+    },
+    onSuccess: ({ followups, studentName }) => {
       toast.success("Student added");
-      setAddOpen(false); setNewName(""); setNewGrade(""); setNewClass("");
+      for (const { kind, payload } of followups) {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: kind,
+          recipient_name: kind === "parent" ? "there" : studentName,
+          recipient_email: payload.invitation.email!,
+          school_name: payload.school_name,
+          admin_name: payload.admin_name,
+          invite_url: url,
+          student_name: studentName,
+        });
+        // Stagger so the browser opens both tabs reliably
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), kind === "parent" ? 200 : 1000);
+      }
+      if (followups.length > 0) {
+        toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
+      }
+      setAddOpen(false);
+      setNewName(""); setNewGrade(""); setNewClass(""); setParentEmail(""); setStudentEmail("");
       qc.invalidateQueries({ queryKey: ["admin-students"] });
+      qc.invalidateQueries({ queryKey: ["invitations"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
