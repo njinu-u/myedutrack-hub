@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { bulkCreateStudents, createStudent, listStudents } from "@/lib/students.functions";
+import { createInvitation } from "@/lib/invitations.functions";
+import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
 import Papa from "papaparse";
 
