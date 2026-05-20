@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { bulkCreateStudents, createStudent, listStudents } from "@/lib/students.functions";
+import { createInvitation } from "@/lib/invitations.functions";
+import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
 import Papa from "papaparse";
 
@@ -33,6 +35,7 @@ function StudentsPage() {
   const fetchStudents = useServerFn(listStudents);
   const addStudent = useServerFn(createStudent);
   const bulkAdd = useServerFn(bulkCreateStudents);
+  const invite = useServerFn(createInvitation);
 
   const realQuery = useQuery({
     queryKey: ["admin-students"],
@@ -52,13 +55,51 @@ function StudentsPage() {
   const [newName, setNewName] = useState("");
   const [newGrade, setNewGrade] = useState("");
   const [newClass, setNewClass] = useState("");
+  const [parentEmail, setParentEmail] = useState("");
+  const [studentEmail, setStudentEmail] = useState("");
 
   const addMut = useMutation({
-    mutationFn: () => addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const created = await addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } });
+      const studentId = created.id;
+      const followups: Array<{ kind: "parent" | "student"; payload: Awaited<ReturnType<typeof invite>> }> = [];
+      if (parentEmail.trim()) {
+        const res = await invite({
+          data: { role: "parent", name: `Parent of ${newName.trim()}`, email: parentEmail.trim(), linked_student_id: studentId },
+        });
+        followups.push({ kind: "parent", payload: res });
+      }
+      if (studentEmail.trim()) {
+        const res = await invite({
+          data: { role: "student", name: newName.trim(), email: studentEmail.trim(), linked_student_id: studentId },
+        });
+        followups.push({ kind: "student", payload: res });
+      }
+      return { followups, studentName: newName.trim() };
+    },
+    onSuccess: ({ followups, studentName }) => {
       toast.success("Student added");
-      setAddOpen(false); setNewName(""); setNewGrade(""); setNewClass("");
+      for (const { kind, payload } of followups) {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: kind,
+          recipient_name: kind === "parent" ? "there" : studentName,
+          recipient_email: payload.invitation.email!,
+          school_name: payload.school_name,
+          admin_name: payload.admin_name,
+          invite_url: url,
+          student_name: studentName,
+        });
+        // Stagger so the browser opens both tabs reliably
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), kind === "parent" ? 200 : 1000);
+      }
+      if (followups.length > 0) {
+        toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
+      }
+      setAddOpen(false);
+      setNewName(""); setNewGrade(""); setNewClass(""); setParentEmail(""); setStudentEmail("");
       qc.invalidateQueries({ queryKey: ["admin-students"] });
+      qc.invalidateQueries({ queryKey: ["invitations"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -232,6 +273,11 @@ function StudentsPage() {
               <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Class</span>
                 <input value={newClass} onChange={(e) => setNewClass(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7B" /></label>
             </div>
+            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email (optional)</span>
+              <input type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="parent@example.com" /></label>
+            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Student email (optional)</span>
+              <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="student@example.com" /></label>
+            <p className="text-xs text-muted-foreground">If provided, invitations save and open in a Gmail tab for you to send.</p>
           </div>
           <DialogFooter>
             <button onClick={() => setAddOpen(false)} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
