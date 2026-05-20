@@ -273,6 +273,11 @@ function StudentsPage() {
               <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Class</span>
                 <input value={newClass} onChange={(e) => setNewClass(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7B" /></label>
             </div>
+            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email (optional)</span>
+              <input type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="parent@example.com" /></label>
+            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Student email (optional)</span>
+              <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="student@example.com" /></label>
+            <p className="text-xs text-muted-foreground">If provided, invitations save and open in a Gmail tab for you to send.</p>
           </div>
           <DialogFooter>
             <button onClick={() => setAddOpen(false)} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
