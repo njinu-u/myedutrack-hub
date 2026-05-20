@@ -35,6 +35,7 @@ function StudentsPage() {
   const fetchStudents = useServerFn(listStudents);
   const addStudent = useServerFn(createStudent);
   const bulkAdd = useServerFn(bulkCreateStudents);
+  const invite = useServerFn(createInvitation);
 
   const realQuery = useQuery({
     queryKey: ["admin-students"],
