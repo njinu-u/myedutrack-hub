@@ -28,6 +28,8 @@ for (const f of files) {
   if (!/@\/lib\/mock-data/.test(src)) continue;
   // Skip public/marketing routes (no Live* component, fully demo by design).
   if (!/function\s+Live[A-Za-z0-9_]*\s*\(/.test(src)) continue;
+  // Skip files that don't actually branch on auth (e.g. marketing pages).
+  if (!/useAuth\s*\(/.test(src)) continue;
 
   // Find spans of Demo* functions; everything outside is "non-demo" code.
   // Cheap heuristic: split by top-level `function ` declarations.
