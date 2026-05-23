@@ -97,9 +97,15 @@ function Page() {
           <form onSubmit={submit} className="mt-4 space-y-3">
             <label className="block">
               <span className="text-xs uppercase tracking-wider text-muted-foreground">Student</span>
-              <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm">
-                {studentOptions.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+              {hasStudents ? (
+                <select value={studentId} onChange={(e) => setStudentId(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm">
+                  {studentOptions.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              ) : (
+                <div className="mt-1 text-xs text-muted-foreground p-3 rounded-lg border bg-secondary/40">
+                  No students enrolled yet. Ask your admin to add students before logging observations.
+                </div>
+              )}
             </label>
             <label className="block">
               <span className="text-xs uppercase tracking-wider text-muted-foreground">Subject (optional)</span>
