@@ -48,6 +48,7 @@ function Page() {
   const studentOptions = isReal
     ? realStudents.map((s) => ({ id: s.id, name: s.full_name }))
     : STUDENTS.map((s) => ({ id: s.id, name: s.name }));
+  const hasStudents = studentOptions.length > 0;
 
   useEffect(() => {
     if (!studentId && studentOptions[0]) setStudentId(studentOptions[0].id);
