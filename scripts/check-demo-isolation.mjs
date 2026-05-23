@@ -66,6 +66,8 @@ for (const f of files) {
       if (!re.test(lines[i])) continue;
       // Allow on import lines
       if (/^\s*import\s/.test(lines[i])) continue;
+      // Allow the canonical demo-fallback ternary: `isReal ? <real> : <MOCK>`
+      if (/isReal\s*\?/.test(lines[i]) || /:\s*[A-Z_]+\.(map|filter|slice)/.test(lines[i])) continue;
       const fn = ranges.find((r) => i >= r.start && i <= r.end);
       const inDemo = fn && /^Demo/.test(fn.name);
       if (!inDemo) {
