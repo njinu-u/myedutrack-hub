@@ -26,7 +26,7 @@ const STATUS_TONES: Record<string, string> = {
   "New Transfer": "bg-teal/15 text-teal",
 };
 
-type CsvRow = { full_name: string; grade?: string | null; class_id?: string | null; photo_url?: string | null };
+type CsvRow = { full_name: string | null; grade?: string | null; class_id?: string | null; photo_url?: string | null };
 
 function StudentsPage() {
   const auth = useAuth();
@@ -141,24 +141,21 @@ function StudentsPage() {
       complete: (results) => {
         const fields = (results.meta.fields ?? []).map((f) => f.trim().toLowerCase());
         const nameKey = fields.find((f) => ["name", "full_name", "student", "student_name"].includes(f));
-        if (!nameKey) {
-          setCsvError("Column 'name' is required but was not found");
-          return;
-        }
+        // name is optional — if column exists use it; if not, generate placeholder names
         const rows: CsvRow[] = results.data
           .map((raw): CsvRow | null => {
             const norm: Record<string, string> = {};
             Object.entries(raw).forEach(([k, v]) => { norm[k.trim().toLowerCase()] = (v ?? "").toString().trim(); });
-            const full_name = norm[nameKey];
-            if (!full_name) return null;
+            // Allow empty name — admin can fill it later
+            const full_name = nameKey ? norm[nameKey] || null : null;
             return {
-              full_name,
+              full_name: full_name ?? null,
               grade: norm["grade"] || null,
               class_id: norm["class"] || norm["class_id"] || null,
               photo_url: norm["photo_url"] || norm["photo"] || null,
             };
           })
-          .filter((r): r is CsvRow => !!r);
+          .filter((r): r is CsvRow => r !== null);
         if (rows.length === 0) {
           setCsvError("No valid rows found in CSV");
           return;
