@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const StudentInput = z.object({
-  full_name: z.string().trim().min(1).max(200),
+  full_name: z.string().trim().max(200).optional().nullable(),
   grade: z.string().trim().max(50).optional().nullable(),
   class_id: z.string().trim().max(50).optional().nullable(),
   photo_url: z.string().url().max(500).optional().nullable(),
@@ -19,7 +19,7 @@ export const createStudent = createServerFn({ method: "POST" })
     const { data: row, error } = await supabase
       .from("students")
       .insert({
-        full_name: data.full_name,
+        full_name: data.full_name?.trim() || "Unnamed Student",
         grade: data.grade ?? null,
         class_id: data.class_id ?? null,
         photo_url: data.photo_url ?? null,
@@ -39,7 +39,7 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
     const { data: school } = await supabase.from("schools").select("id").maybeSingle();
     if (!school) throw new Error("No school found for current user");
     const payload = data.rows.map((r) => ({
-      full_name: r.full_name,
+      full_name: r.full_name?.trim() || "Unnamed Student",
       grade: r.grade ?? null,
       class_id: r.class_id ?? null,
       photo_url: r.photo_url ?? null,
