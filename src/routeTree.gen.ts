@@ -55,7 +55,6 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
 import { Route as AdminGradesRouteImport } from './routes/admin.grades'
-import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminCurriculumRouteImport } from './routes/admin.curriculum'
 import { Route as AdminCommunicationRouteImport } from './routes/admin.communication'
 import { Route as AdminAttendanceRouteImport } from './routes/admin.attendance'
@@ -293,11 +292,6 @@ const AdminGradesRoute = AdminGradesRouteImport.update({
   path: '/grades',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminFinanceRoute = AdminFinanceRouteImport.update({
-  id: '/finance',
-  path: '/finance',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminCurriculumRoute = AdminCurriculumRouteImport.update({
   id: '/curriculum',
   path: '/curriculum',
@@ -345,7 +339,6 @@ export interface FileRoutesByFullPath {
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/communication': typeof AdminCommunicationRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
-  '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -395,7 +388,6 @@ export interface FileRoutesByTo {
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/communication': typeof AdminCommunicationRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
-  '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -451,7 +443,6 @@ export interface FileRoutesById {
   '/admin/attendance': typeof AdminAttendanceRoute
   '/admin/communication': typeof AdminCommunicationRoute
   '/admin/curriculum': typeof AdminCurriculumRoute
-  '/admin/finance': typeof AdminFinanceRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -508,7 +499,6 @@ export interface FileRouteTypes {
     | '/admin/attendance'
     | '/admin/communication'
     | '/admin/curriculum'
-    | '/admin/finance'
     | '/admin/grades'
     | '/admin/invitations'
     | '/admin/reports'
@@ -558,7 +548,6 @@ export interface FileRouteTypes {
     | '/admin/attendance'
     | '/admin/communication'
     | '/admin/curriculum'
-    | '/admin/finance'
     | '/admin/grades'
     | '/admin/invitations'
     | '/admin/reports'
@@ -613,7 +602,6 @@ export interface FileRouteTypes {
     | '/admin/attendance'
     | '/admin/communication'
     | '/admin/curriculum'
-    | '/admin/finance'
     | '/admin/grades'
     | '/admin/invitations'
     | '/admin/reports'
@@ -991,13 +979,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminGradesRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/finance': {
-      id: '/admin/finance'
-      path: '/finance'
-      fullPath: '/admin/finance'
-      preLoaderRoute: typeof AdminFinanceRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/curriculum': {
       id: '/admin/curriculum'
       path: '/curriculum'
@@ -1061,7 +1042,6 @@ interface AdminRouteChildren {
   AdminAttendanceRoute: typeof AdminAttendanceRoute
   AdminCommunicationRoute: typeof AdminCommunicationRoute
   AdminCurriculumRoute: typeof AdminCurriculumRoute
-  AdminFinanceRoute: typeof AdminFinanceRoute
   AdminGradesRoute: typeof AdminGradesRoute
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminReportsRoute: typeof AdminReportsRoute
@@ -1078,7 +1058,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAttendanceRoute: AdminAttendanceRoute,
   AdminCommunicationRoute: AdminCommunicationRoute,
   AdminCurriculumRoute: AdminCurriculumRoute,
-  AdminFinanceRoute: AdminFinanceRoute,
   AdminGradesRoute: AdminGradesRoute,
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminReportsRoute: AdminReportsRoute,
@@ -1198,3 +1177,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
