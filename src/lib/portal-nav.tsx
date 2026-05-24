@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, GraduationCap, BarChart3, ClipboardList, CalendarCheck, CalendarRange, BookOpen, MessageSquare, UserCog, Wallet, FileText, Settings, BookMarked, Heart, Brain, ShieldAlert, FolderHeart, MessageCircle, Calendar, Sparkles, Smile, Target, TrendingUp, GraduationCap as Cap, Ticket } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, BarChart3, ClipboardList, CalendarCheck, CalendarRange, BookOpen, MessageSquare, UserCog, FileText, Settings, BookMarked, Heart, Brain, ShieldAlert, FolderHeart, MessageCircle, Calendar, Sparkles, Smile, Target, TrendingUp, GraduationCap as Cap, Ticket } from "lucide-react";
 import type { NavItem } from "@/components/portal-layout";
 
 export const ADMIN_NAV: NavItem[] = [
@@ -13,7 +13,6 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/communication", label: "Communication", icon: <MessageSquare className="h-4 w-4" /> },
   { to: "/admin/staff", label: "Staff", icon: <UserCog className="h-4 w-4" /> },
   { to: "/admin/invitations", label: "Invitations", icon: <Ticket className="h-4 w-4" /> },
-  { to: "/admin/finance", label: "Finance", icon: <Wallet className="h-4 w-4" /> },
   { to: "/admin/reports", label: "Reports", icon: <FileText className="h-4 w-4" /> },
   { to: "/admin/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
 ];
