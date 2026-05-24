@@ -286,25 +286,25 @@ function Devices() {
 
 function Pricing() {
   const tiers = [
-    { name: "Free Pilot", price: "$0", period: "12-week pilot", features: ["Up to 50 students","All 5 portals","Email support"], cta: "Start pilot", featured: false },
-    { name: "School", price: "$12", period: "per student / year", features: ["Unlimited staff","Full AI co-pilot","WhatsApp delivery","Multi-language reports","Priority support"], cta: "Talk to us", featured: true },
-    { name: "District", price: "Custom", period: "10+ schools", features: ["Cross-school analytics","Dedicated success manager","Single sign-on","Custom integrations"], cta: "Contact sales", featured: false },
+    { name: "Free Pilot", price: "$0", period: "12-week pilot", description: "", features: ["Up to 50 students","All 5 portals","Email support"], cta: "Start pilot", featured: false },
+    { name: "School", price: "$50", period: "flat annual fee", description: "One simple price for your whole school. No per-student counting. No surprises.", features: ["Unlimited staff","Full AI co-pilot","WhatsApp delivery","Multi-language reports","Priority support"], cta: "Get Started", featured: true },
+    { name: "District", price: "Custom", period: "10+ schools", description: "", features: ["Cross-school analytics","Dedicated success manager","Single sign-on","Custom integrations"], cta: "Contact sales", featured: false },
   ];
   return (
     <section id="pricing" className="py-24 lg:py-32">
       <div className="max-w-6xl mx-auto px-5 lg:px-8">
         <div className="text-center max-w-2xl mx-auto">
           <div className="text-xs uppercase tracking-[0.25em] text-teal">Simple pricing</div>
-          <h2 className="font-display text-4xl md:text-5xl mt-3">$12 per student. <em className="not-italic text-teal">Per year.</em></h2>
+          <h2 className="font-display text-4xl md:text-5xl mt-3">$50 per school. <em className="not-italic text-teal">Per year.</em></h2>
           <p className="text-muted-foreground mt-4">No setup fees. No per-seat charges for staff. No surprise add-ons.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-5 mt-14">
           {tiers.map((t) => (
             <div key={t.name} className={`rounded-2xl p-7 border relative ${t.featured ? "bg-navy text-white border-navy shadow-elevated -mt-4" : "bg-card border-border"}`}>
-              {t.featured && <div className="absolute top-4 right-4 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full bg-amber text-navy">Most schools</div>}
               <div className={`text-xs uppercase tracking-wider ${t.featured ? "text-amber" : "text-teal"}`}>{t.name}</div>
               <div className="font-display text-5xl mt-3">{t.price}</div>
               <div className={`text-xs ${t.featured ? "text-white/60" : "text-muted-foreground"}`}>{t.period}</div>
+              {t.description && <p className={`text-sm mt-3 ${t.featured ? "text-white/80" : "text-muted-foreground"}`}>{t.description}</p>}
               <ul className={`mt-6 space-y-2 text-sm ${t.featured ? "text-white/85" : ""}`}>
                 {t.features.map((f) => <li key={f} className="flex gap-2"><Check className="h-4 w-4 text-teal mt-0.5 shrink-0" /> {f}</li>)}
               </ul>
