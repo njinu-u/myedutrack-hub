@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { PortalLayout } from "@/components/portal-layout";
 import { COUNSELOR_NAV } from "@/lib/portal-nav";
-import { usePortalGuard } from "./admin";
+import { usePortalGuard, SubscriptionGate } from "./admin";
 
 export const Route = createFileRoute("/counselor")({
   head: () => ({ meta: [{ title: "Counselor Portal — EduTrack" }] }),
@@ -9,5 +9,9 @@ export const Route = createFileRoute("/counselor")({
 });
 function Layout() {
   usePortalGuard("counselor");
-  return <PortalLayout role="counselor" nav={COUNSELOR_NAV} brandSubtitle="Wellbeing & Intervention"><Outlet /></PortalLayout>;
+  return (
+    <PortalLayout role="counselor" nav={COUNSELOR_NAV} brandSubtitle="Wellbeing & Intervention">
+      <SubscriptionGate role="counselor"><Outlet /></SubscriptionGate>
+    </PortalLayout>
+  );
 }

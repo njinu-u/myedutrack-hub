@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { PortalLayout } from "@/components/portal-layout";
 import { PARENT_NAV } from "@/lib/portal-nav";
-import { usePortalGuard } from "./admin";
+import { usePortalGuard, SubscriptionGate } from "./admin";
 
 export const Route = createFileRoute("/parent")({
   head: () => ({ meta: [{ title: "Parent Portal — EduTrack" }] }),
@@ -9,5 +9,9 @@ export const Route = createFileRoute("/parent")({
 });
 function Layout() {
   usePortalGuard("parent");
-  return <PortalLayout role="parent" nav={PARENT_NAV} brandSubtitle="Adwoa · Kofi's mother"><Outlet /></PortalLayout>;
+  return (
+    <PortalLayout role="parent" nav={PARENT_NAV} brandSubtitle="Adwoa · Kofi's mother">
+      <SubscriptionGate role="parent"><Outlet /></SubscriptionGate>
+    </PortalLayout>
+  );
 }
