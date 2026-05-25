@@ -562,12 +562,17 @@ export type Database = {
         Row: {
           activated_at: string | null
           admin_email: string
+          admin_user_id: string | null
           country: string | null
           created_at: string
           id: string
+          is_paid: boolean
           name: string
           paddle_customer_id: string | null
           paddle_transaction_id: string | null
+          paid_until: string | null
+          paypal_order_id: string | null
+          pilot_start_date: string
           plan: Database["public"]["Enums"]["school_plan"]
           status: Database["public"]["Enums"]["school_status"]
           student_count: number | null
@@ -576,12 +581,17 @@ export type Database = {
         Insert: {
           activated_at?: string | null
           admin_email: string
+          admin_user_id?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          is_paid?: boolean
           name: string
           paddle_customer_id?: string | null
           paddle_transaction_id?: string | null
+          paid_until?: string | null
+          paypal_order_id?: string | null
+          pilot_start_date?: string
           plan?: Database["public"]["Enums"]["school_plan"]
           status?: Database["public"]["Enums"]["school_status"]
           student_count?: number | null
@@ -590,12 +600,17 @@ export type Database = {
         Update: {
           activated_at?: string | null
           admin_email?: string
+          admin_user_id?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          is_paid?: boolean
           name?: string
           paddle_customer_id?: string | null
           paddle_transaction_id?: string | null
+          paid_until?: string | null
+          paypal_order_id?: string | null
+          pilot_start_date?: string
           plan?: Database["public"]["Enums"]["school_plan"]
           status?: Database["public"]["Enums"]["school_status"]
           student_count?: number | null
