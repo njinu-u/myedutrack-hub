@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { signupSchoolAdmin } from "@/lib/signup.functions";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({
@@ -65,7 +65,7 @@ function Signup() {
           <Field label="School name" value={form.school_name} onChange={(v) => setForm({ ...form, school_name: v })} placeholder="Riverside International School" required />
           <Field label="Your full name" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} placeholder="Adwoa Mensah" required />
           <Field label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="admin@school.edu" required />
-          <Field label="Password" type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} placeholder="At least 8 characters" required />
+          <PasswordField label="Password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} placeholder="At least 8 characters" />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Country" value={form.country} onChange={(v) => setForm({ ...form, country: v })} placeholder="Kenya" required />
             <Field label="Number of students" type="number" value={String(form.student_count)} onChange={(v) => setForm({ ...form, student_count: Number(v) })} required />
@@ -99,6 +99,30 @@ function Field({ label, value, onChange, type = "text", placeholder, required }:
         required={required}
         className="mt-1 w-full px-4 py-2.5 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
       />
+    </label>
+  );
+}
+
+function PasswordField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <label className="block">
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className="relative mt-1">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          minLength={8}
+          className="w-full px-4 py-2.5 pr-11 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+        />
+        <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"}
+          className="absolute inset-y-0 right-0 px-3 grid place-items-center text-muted-foreground hover:text-foreground">
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
     </label>
   );
 }

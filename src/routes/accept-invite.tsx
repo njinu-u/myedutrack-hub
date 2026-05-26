@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupInvitationByToken, redeemInvitationByToken } from "@/lib/invitations.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/accept-invite")({
   head: () => ({ meta: [{ title: "Accept invite — EduTrack" }] }),
@@ -26,6 +26,8 @@ function AcceptInvite() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (!token) { setError("Missing invite token"); setLoading(false); return; }
@@ -94,13 +96,25 @@ function AcceptInvite() {
             <form onSubmit={submit} className="mt-5 space-y-3">
               <label className="block">
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">New password (8+ chars)</span>
-                <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <div className="relative mt-1">
+                  <input type={showPw ? "text" : "password"} required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-3 py-2 pr-10 rounded-lg border bg-card text-sm" />
+                  <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Hide password" : "Show password"}
+                    className="absolute inset-y-0 right-0 px-2.5 grid place-items-center text-muted-foreground hover:text-foreground">
+                    {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </label>
               <label className="block">
                 <span className="text-xs uppercase tracking-wider text-muted-foreground">Confirm password</span>
-                <input type="password" required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <div className="relative mt-1">
+                  <input type={showConfirm ? "text" : "password"} required minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)}
+                    className="w-full px-3 py-2 pr-10 rounded-lg border bg-card text-sm" />
+                  <button type="button" onClick={() => setShowConfirm((v) => !v)} aria-label={showConfirm ? "Hide password" : "Show password"}
+                    className="absolute inset-y-0 right-0 px-2.5 grid place-items-center text-muted-foreground hover:text-foreground">
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </label>
               {submitErr && <div className="text-sm text-danger bg-danger/10 rounded-lg p-3">{submitErr}</div>}
               <button type="submit" disabled={busy}

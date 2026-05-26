@@ -35,8 +35,19 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
   const tint = ROLE_TINTS[role];
   const roleMeta = ROLES.find((r) => r.id === role)!;
 
-  const handleLogout = () => {
-    auth.setRole(null);
+  // Real users never see demo persona strings — always use their own profile.
+  const liveSubtitle = auth.isAuthed
+    ? (auth.appUser?.full_name ?? auth.appUser?.email ?? roleMeta.desc)
+    : null;
+  const displaySubtitle = liveSubtitle ?? brandSubtitle ?? roleMeta.desc;
+
+  const initials = auth.isAuthed && auth.appUser?.full_name
+    ? auth.appUser.full_name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join("")
+    : (role === "parent" ? "AM" : role === "student" ? "KM" : role === "teacher" ? "OD" : role === "counselor" ? "RW" : "AD");
+
+  const handleLogout = async () => {
+    if (auth.isAuthed) await auth.signOut();
+    else auth.setRole(null);
     navigate({ to: "/login" });
   };
 
@@ -52,7 +63,7 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
             <div className={cn("h-9 w-9 rounded-lg bg-gradient-to-br grid place-items-center font-display font-bold text-white", tint.bg)}>E</div>
             <div className="leading-tight">
               <div className="font-display text-lg tracking-tight">EduTrack</div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60">{brandSubtitle ?? roleMeta.desc}</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60 truncate">{displaySubtitle}</div>
             </div>
           </Link>
         </div>
@@ -87,7 +98,7 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
             <p className="text-[11px] opacity-80 mt-1 leading-snug">Drawing insights from 482 students and 38 teachers.</p>
           </div>
           <button onClick={handleLogout} className="mt-3 w-full flex items-center justify-center gap-2 text-xs text-sidebar-foreground/70 hover:text-white py-2 rounded-lg hover:bg-sidebar-accent/60">
-            <LogOut className="h-3.5 w-3.5" /> Switch role
+            <LogOut className="h-3.5 w-3.5" /> {auth.isAuthed ? "Sign out" : "Switch role"}
           </button>
         </div>
       </aside>
@@ -114,8 +125,8 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber" />
               </button>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold">
-                {role === "parent" ? "AM" : role === "student" ? "KM" : role === "teacher" ? "OD" : role === "counselor" ? "RW" : "AD"}
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold" title={auth.appUser?.full_name ?? ""}>
+                {initials}
               </div>
             </div>
           </div>
