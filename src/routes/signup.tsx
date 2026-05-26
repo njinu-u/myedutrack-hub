@@ -102,3 +102,27 @@ function Field({ label, value, onChange, type = "text", placeholder, required }:
     </label>
   );
 }
+
+function PasswordField({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <label className="block">
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className="relative mt-1">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          minLength={8}
+          className="w-full px-4 py-2.5 pr-11 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30"
+        />
+        <button type="button" onClick={() => setShow((v) => !v)} aria-label={show ? "Hide password" : "Show password"}
+          className="absolute inset-y-0 right-0 px-3 grid place-items-center text-muted-foreground hover:text-foreground">
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    </label>
+  );
+}
