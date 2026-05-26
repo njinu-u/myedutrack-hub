@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ROLES, type Role } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -20,6 +20,7 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -35,12 +36,24 @@ function Login() {
       .eq("id", data.user.id)
       .maybeSingle();
     const role = profile?.role;
+    if (!role) {
+      await supabase.auth.signOut();
+      setErr("Your account isn't linked to a school yet. Please contact your school admin.");
+      setBusy(false);
+      return;
+    }
     const target = role === "school_admin" ? "/admin"
       : role === "teacher" ? "/teacher"
       : role === "counselor" ? "/counselor"
       : role === "parent" ? "/parent"
       : role === "student" ? "/student"
-      : "/admin";
+      : null;
+    if (!target) {
+      await supabase.auth.signOut();
+      setErr("Your account role isn't recognised. Please contact your school admin.");
+      setBusy(false);
+      return;
+    }
     navigate({ to: target as "/admin" });
   };
 
