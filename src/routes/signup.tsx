@@ -65,7 +65,7 @@ function Signup() {
           <Field label="School name" value={form.school_name} onChange={(v) => setForm({ ...form, school_name: v })} placeholder="Riverside International School" required />
           <Field label="Your full name" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} placeholder="Adwoa Mensah" required />
           <Field label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="admin@school.edu" required />
-          <Field label="Password" type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} placeholder="At least 8 characters" required />
+          <PasswordField label="Password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} placeholder="At least 8 characters" />
           <div className="grid grid-cols-2 gap-3">
             <Field label="Country" value={form.country} onChange={(v) => setForm({ ...form, country: v })} placeholder="Kenya" required />
             <Field label="Number of students" type="number" value={String(form.student_count)} onChange={(v) => setForm({ ...form, student_count: Number(v) })} required />
