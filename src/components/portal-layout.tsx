@@ -63,7 +63,7 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
             <div className={cn("h-9 w-9 rounded-lg bg-gradient-to-br grid place-items-center font-display font-bold text-white", tint.bg)}>E</div>
             <div className="leading-tight">
               <div className="font-display text-lg tracking-tight">EduTrack</div>
-              <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60">{brandSubtitle ?? roleMeta.desc}</div>
+              <div className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60 truncate">{displaySubtitle}</div>
             </div>
           </Link>
         </div>
