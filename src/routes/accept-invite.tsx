@@ -26,6 +26,8 @@ function AcceptInvite() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [submitErr, setSubmitErr] = useState<string | null>(null);
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (!token) { setError("Missing invite token"); setLoading(false); return; }
