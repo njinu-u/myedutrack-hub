@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { lookupInvitationByToken, redeemInvitationByToken } from "@/lib/invitations.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/accept-invite")({
   head: () => ({ meta: [{ title: "Accept invite — EduTrack" }] }),
