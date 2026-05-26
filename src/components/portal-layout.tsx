@@ -125,8 +125,8 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber" />
               </button>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold">
-                {role === "parent" ? "AM" : role === "student" ? "KM" : role === "teacher" ? "OD" : role === "counselor" ? "RW" : "AD"}
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold" title={auth.appUser?.full_name ?? ""}>
+                {initials}
               </div>
             </div>
           </div>
