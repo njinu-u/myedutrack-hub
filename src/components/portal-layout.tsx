@@ -98,7 +98,7 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
             <p className="text-[11px] opacity-80 mt-1 leading-snug">Drawing insights from 482 students and 38 teachers.</p>
           </div>
           <button onClick={handleLogout} className="mt-3 w-full flex items-center justify-center gap-2 text-xs text-sidebar-foreground/70 hover:text-white py-2 rounded-lg hover:bg-sidebar-accent/60">
-            <LogOut className="h-3.5 w-3.5" /> Switch role
+            <LogOut className="h-3.5 w-3.5" /> {auth.isAuthed ? "Sign out" : "Switch role"}
           </button>
         </div>
       </aside>
