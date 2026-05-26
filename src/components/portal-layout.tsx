@@ -35,8 +35,19 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
   const tint = ROLE_TINTS[role];
   const roleMeta = ROLES.find((r) => r.id === role)!;
 
-  const handleLogout = () => {
-    auth.setRole(null);
+  // Real users never see demo persona strings — always use their own profile.
+  const liveSubtitle = auth.isAuthed
+    ? (auth.appUser?.full_name ?? auth.appUser?.email ?? roleMeta.desc)
+    : null;
+  const displaySubtitle = liveSubtitle ?? brandSubtitle ?? roleMeta.desc;
+
+  const initials = auth.isAuthed && auth.appUser?.full_name
+    ? auth.appUser.full_name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join("")
+    : (role === "parent" ? "AM" : role === "student" ? "KM" : role === "teacher" ? "OD" : role === "counselor" ? "RW" : "AD");
+
+  const handleLogout = async () => {
+    if (auth.isAuthed) await auth.signOut();
+    else auth.setRole(null);
     navigate({ to: "/login" });
   };
 
