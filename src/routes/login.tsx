@@ -87,9 +87,18 @@ function Login() {
               className="mt-1 w-full px-4 py-2.5 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30" />
           </label>
           <label className="block">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">Password</span>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-              className="mt-1 w-full px-4 py-2.5 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30" />
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">Password</span>
+              <Link to="/forgot-password" className="text-xs text-navy underline">Forgot password?</Link>
+            </div>
+            <div className="relative mt-1">
+              <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required
+                className="w-full px-4 py-2.5 pr-11 rounded-xl border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-navy/30" />
+              <button type="button" onClick={() => setShowPw((v) => !v)} aria-label={showPw ? "Hide password" : "Show password"}
+                className="absolute inset-y-0 right-0 px-3 grid place-items-center text-muted-foreground hover:text-foreground">
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </label>
           {err && <div className="text-sm text-danger bg-danger/10 rounded-lg p-3">{err}</div>}
           <button type="submit" disabled={busy} className="w-full py-3 rounded-full bg-navy text-white font-medium inline-flex items-center justify-center gap-2 disabled:opacity-60">
@@ -100,6 +109,7 @@ function Login() {
         <p className="text-xs text-muted-foreground mt-3">
           New school? <Link to="/signup" className="text-navy underline">Create an account</Link>
         </p>
+
 
         <div className="mt-10">
           <div className="flex items-center gap-3 mb-4">
