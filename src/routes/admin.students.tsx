@@ -36,6 +36,13 @@ function StudentsPage() {
   const addStudent = useServerFn(createStudent);
   const bulkAdd = useServerFn(bulkCreateStudents);
   const invite = useServerFn(createInvitation);
+  const removeStudent = useServerFn(deleteStudent);
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => removeStudent({ data: { id } }),
+    onSuccess: () => { toast.success("Student deleted"); qc.invalidateQueries({ queryKey: ["admin-students"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const realQuery = useQuery({
     queryKey: ["admin-students"],
