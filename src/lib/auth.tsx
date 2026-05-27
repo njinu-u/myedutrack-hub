@@ -97,12 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function fetchAppUser(uid: string) {
     const { data } = await supabase
       .from("app_users")
-      .select("id,email,full_name,role,school_id,linked_student_id")
+      .select("id,email,full_name,role,school_id,linked_student_id,avatar_url,phone_number")
       .eq("id", uid)
       .maybeSingle();
     setAppUser(data as AppUser | null);
     setLoading(false);
   }
+
+  const refreshAppUser = async () => {
+    if (user?.id) await fetchAppUser(user.id);
+  };
 
   const setRole = (r: Role | null) => {
     setRoleState(r);
@@ -123,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthCtx.Provider value={{
-      role, setRole, user, session, appUser, loading, signOut,
+      role, setRole, user, session, appUser, loading, signOut, refreshAppUser,
       isDemo, isAuthed, effectiveRole,
     }}>
       {children}
