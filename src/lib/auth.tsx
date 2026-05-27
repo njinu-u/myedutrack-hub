@@ -12,6 +12,8 @@ export interface AppUser {
   role: AppRole;
   school_id: string | null;
   linked_student_id: string | null;
+  avatar_url: string | null;
+  phone_number: string | null;
 }
 
 interface AuthState {
@@ -25,6 +27,7 @@ interface AuthState {
   appUser: AppUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshAppUser: () => Promise<void>;
 
   // Helpers
   isDemo: boolean;        // true when there's a demo role but no real user
@@ -35,7 +38,7 @@ interface AuthState {
 const AuthCtx = createContext<AuthState>({
   role: null, setRole: () => {},
   user: null, session: null, appUser: null, loading: true,
-  signOut: async () => {},
+  signOut: async () => {}, refreshAppUser: async () => {},
   isDemo: false, isAuthed: false, effectiveRole: null,
 });
 
@@ -94,12 +97,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function fetchAppUser(uid: string) {
     const { data } = await supabase
       .from("app_users")
-      .select("id,email,full_name,role,school_id,linked_student_id")
+      .select("id,email,full_name,role,school_id,linked_student_id,avatar_url,phone_number")
       .eq("id", uid)
       .maybeSingle();
     setAppUser(data as AppUser | null);
     setLoading(false);
   }
+
+  const refreshAppUser = async () => {
+    if (user?.id) await fetchAppUser(user.id);
+  };
 
   const setRole = (r: Role | null) => {
     setRoleState(r);
@@ -120,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthCtx.Provider value={{
-      role, setRole, user, session, appUser, loading, signOut,
+      role, setRole, user, session, appUser, loading, signOut, refreshAppUser,
       isDemo, isAuthed, effectiveRole,
     }}>
       {children}
