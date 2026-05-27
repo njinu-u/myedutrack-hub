@@ -37,8 +37,8 @@ export const markAttendance = createServerFn({ method: "POST" })
     }).parse(i)
   )
   .handler(async ({ data, context }) => {
-    const { data: u } = await context.supabase.from("app_users").select("school_id").maybeSingle();
-    if (!u?.school_id) throw new Error("No school");
+    const { data: u } = await context.supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
+    if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
     // Delete any prior record for the same student+date, then insert. (No unique constraint.)
     const { error: dErr } = await context.supabase
       .from("attendance")

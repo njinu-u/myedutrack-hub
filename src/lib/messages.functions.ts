@@ -38,8 +38,8 @@ export const sendMessage = createServerFn({ method: "POST" })
     }).parse(i)
   )
   .handler(async ({ data, context }) => {
-    const { data: u } = await context.supabase.from("app_users").select("school_id").maybeSingle();
-    if (!u?.school_id) throw new Error("No school");
+    const { data: u } = await context.supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
+    if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
     const { error } = await context.supabase.from("messages").insert({
       from_user_id: context.userId,
       to_user_id: data.to_user_id,

@@ -54,8 +54,8 @@ export const upsertGrade = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: u } = await supabase.from("app_users").select("school_id").maybeSingle();
-    if (!u?.school_id) throw new Error("No school");
+    const { data: u } = await supabase.from("app_users").select("school_id").eq("id", userId).maybeSingle();
+    if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
     const { error: dErr } = await supabase.from("grades").delete()
       .eq("student_id", data.student_id).eq("subject", data.subject).eq("term", data.term);
     if (dErr) throw new Error(dErr.message);
