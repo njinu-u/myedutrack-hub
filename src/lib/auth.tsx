@@ -27,6 +27,7 @@ interface AuthState {
   appUser: AppUser | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshAppUser: () => Promise<void>;
 
   // Helpers
   isDemo: boolean;        // true when there's a demo role but no real user
@@ -37,7 +38,7 @@ interface AuthState {
 const AuthCtx = createContext<AuthState>({
   role: null, setRole: () => {},
   user: null, session: null, appUser: null, loading: true,
-  signOut: async () => {},
+  signOut: async () => {}, refreshAppUser: async () => {},
   isDemo: false, isAuthed: false, effectiveRole: null,
 });
 
