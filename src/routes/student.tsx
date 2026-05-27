@@ -10,7 +10,7 @@ export const Route = createFileRoute("/student")({
 function Layout() {
   usePortalGuard("student");
   return (
-    <PortalLayout role="student" nav={STUDENT_NAV} brandSubtitle="Kofi Mensah · Grade 7">
+    <PortalLayout role="student" nav={STUDENT_NAV}>
       <SubscriptionGate role="student"><Outlet /></SubscriptionGate>
     </PortalLayout>
   );

@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, X } from "lucide-react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, X, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { bulkCreateStudents, createStudent, listStudents } from "@/lib/students.functions";
+import { bulkCreateStudents, createStudent, deleteStudent, listStudents } from "@/lib/students.functions";
 import { createInvitation } from "@/lib/invitations.functions";
 import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
@@ -36,6 +36,13 @@ function StudentsPage() {
   const addStudent = useServerFn(createStudent);
   const bulkAdd = useServerFn(bulkCreateStudents);
   const invite = useServerFn(createInvitation);
+  const removeStudent = useServerFn(deleteStudent);
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => removeStudent({ data: { id } }),
+    onSuccess: () => { toast.success("Student deleted"); qc.invalidateQueries({ queryKey: ["admin-students"] }); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const realQuery = useQuery({
     queryKey: ["admin-students"],
@@ -235,7 +242,7 @@ function StudentsPage() {
           <div className="mt-5 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-xs uppercase tracking-wider text-muted-foreground border-b">
-                <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th></tr>
+                <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th><th className="text-right py-3 font-medium">Actions</th></tr>
               </thead>
               <tbody>
                 {filtered.map((s) => (
@@ -246,6 +253,18 @@ function StudentsPage() {
                     <td className="font-medium">{s.gpa ? s.gpa.toFixed(1) : "—"}</td>
                     <td>{s.attendance ? <span className={cn("font-medium", s.attendance < 80 ? "text-danger" : s.attendance < 90 ? "text-amber" : "text-success")}>{s.attendance}%</span> : <span className="text-muted-foreground">—</span>}</td>
                     <td><span className={cn("text-[10px] uppercase tracking-wider px-2 py-1 rounded-full", STATUS_TONES[s.status] ?? "bg-secondary")}>{s.status}</span></td>
+                    <td className="text-right">
+                      {isReal ? (
+                        <button
+                          onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
+                          disabled={deleteMut.isPending}
+                          className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
+                          aria-label={`Delete ${s.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>
