@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, X } from "lucide-react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, X, Trash2 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { bulkCreateStudents, createStudent, listStudents } from "@/lib/students.functions";
+import { bulkCreateStudents, createStudent, deleteStudent, listStudents } from "@/lib/students.functions";
 import { createInvitation } from "@/lib/invitations.functions";
 import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
