@@ -16,29 +16,35 @@ export type Database = {
     Tables: {
       app_users: {
         Row: {
+          avatar_url: string | null
           created_at: string
           email: string
           full_name: string | null
           id: string
           linked_student_id: string | null
+          phone_number: string | null
           role: Database["public"]["Enums"]["app_role"]
           school_id: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           email: string
           full_name?: string | null
           id: string
           linked_student_id?: string | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           school_id?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
           id?: string
           linked_student_id?: string | null
+          phone_number?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           school_id?: string | null
         }
