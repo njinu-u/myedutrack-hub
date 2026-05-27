@@ -60,3 +60,12 @@ export const listStudents = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return { students: data ?? [] };
   });
+
+export const deleteStudent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("students").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
