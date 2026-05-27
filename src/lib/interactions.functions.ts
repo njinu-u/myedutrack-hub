@@ -38,7 +38,7 @@ export const submitMoodCheckin = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { data: appUser } = await supabase.from("app_users").select("school_id,linked_student_id").maybeSingle();
+    const { data: appUser } = await supabase.from("app_users").select("school_id,linked_student_id").eq("id", context.userId).maybeSingle();
     if (!appUser?.school_id || !appUser.linked_student_id) throw new Error("No linked student");
     const { error } = await supabase.from("mood_checkins").insert({
       mood: data.mood,
