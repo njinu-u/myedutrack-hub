@@ -121,13 +121,17 @@ export function PortalLayout({ role, nav, children, brandSubtitle }: PortalLayou
               <Search className="h-4 w-4" /><span>Search students, classes, reports…</span>
             </div>
             <div className="ml-auto md:ml-0 flex items-center gap-2">
-              <button className="relative h-9 w-9 grid place-items-center rounded-full hover:bg-secondary">
+              <Link to="/notifications" className="relative h-9 w-9 grid place-items-center rounded-full hover:bg-secondary" aria-label="Notifications">
                 <Bell className="h-4 w-4" />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber" />
-              </button>
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold" title={auth.appUser?.full_name ?? ""}>
-                {initials}
-              </div>
+              </Link>
+              <Link to="/profile" aria-label="Profile" title={auth.appUser?.full_name ?? ""} className="h-9 w-9 rounded-full overflow-hidden bg-gradient-to-br from-navy to-teal grid place-items-center text-white text-xs font-semibold hover:ring-2 hover:ring-primary/30 transition">
+                {auth.appUser?.avatar_url ? (
+                  <img src={auth.appUser.avatar_url} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </Link>
             </div>
           </div>
         </header>
