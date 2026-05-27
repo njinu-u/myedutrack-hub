@@ -242,7 +242,7 @@ function StudentsPage() {
           <div className="mt-5 overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-xs uppercase tracking-wider text-muted-foreground border-b">
-                <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th></tr>
+                <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th><th className="text-right py-3 font-medium">Actions</th></tr>
               </thead>
               <tbody>
                 {filtered.map((s) => (
@@ -253,6 +253,18 @@ function StudentsPage() {
                     <td className="font-medium">{s.gpa ? s.gpa.toFixed(1) : "—"}</td>
                     <td>{s.attendance ? <span className={cn("font-medium", s.attendance < 80 ? "text-danger" : s.attendance < 90 ? "text-amber" : "text-success")}>{s.attendance}%</span> : <span className="text-muted-foreground">—</span>}</td>
                     <td><span className={cn("text-[10px] uppercase tracking-wider px-2 py-1 rounded-full", STATUS_TONES[s.status] ?? "bg-secondary")}>{s.status}</span></td>
+                    <td className="text-right">
+                      {isReal ? (
+                        <button
+                          onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
+                          disabled={deleteMut.isPending}
+                          className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
+                          aria-label={`Delete ${s.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>
