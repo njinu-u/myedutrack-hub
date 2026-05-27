@@ -14,8 +14,8 @@ export const bookAppointment = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { data: appUser } = await supabase.from("app_users").select("school_id").maybeSingle();
-    if (!appUser?.school_id) throw new Error("No school");
+    const { data: appUser } = await supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
+    if (!appUser?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
     const { error } = await supabase.from("appointments").insert({
       teacher_user_id: data.teacher_user_id,
       student_id: data.student_id,
