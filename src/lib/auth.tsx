@@ -12,6 +12,8 @@ export interface AppUser {
   role: AppRole;
   school_id: string | null;
   linked_student_id: string | null;
+  avatar_url: string | null;
+  phone_number: string | null;
 }
 
 interface AuthState {
