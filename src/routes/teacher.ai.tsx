@@ -18,9 +18,7 @@ const REPLY = "I can help analyze your live class data once student grades, atte
 function AIChat() {
   const auth = useAuth();
   const teacherName = auth.appUser?.full_name?.trim() || "there";
-  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
-    { role: "ai", text: `Hi ${teacherName}. I'm ready to help with your live class data. Ask me anything.` },
-  ]);
+  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [input, setInput] = useState("");
 
   const ask = (text: string) => {
@@ -34,7 +32,7 @@ function AIChat() {
       <div className="grid lg:grid-cols-4 gap-5">
         <Card className="lg:col-span-3 flex flex-col h-[60vh]">
           <div className="flex-1 overflow-y-auto space-y-3 p-2">
-            {messages.map((m, i) => (
+            {[{ role: "ai" as const, text: `Hi ${teacherName}. I'm ready to help with your live class data. Ask me anything.` }, ...messages].map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${m.role === "user" ? "bg-navy text-white" : "bg-secondary"}`}>
                   {m.text.split("\n").map((l, j) => <p key={j} className="mb-1 last:mb-0">{l}</p>)}
