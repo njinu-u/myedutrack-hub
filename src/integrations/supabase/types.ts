@@ -667,7 +667,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_send_message: { Args: { _to_user_id: string }; Returns: boolean }
       current_linked_student_id: { Args: never; Returns: string }
       current_school_id: { Args: never; Returns: string }
       current_user_role: {
