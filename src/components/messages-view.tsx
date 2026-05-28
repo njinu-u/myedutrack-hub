@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listSchoolUsers, listThread, sendMessage } from "@/lib/messages.functions";
-import { useRealtimeInvalidate } from "@/lib/use-realtime";
+import { useMessageRealtimeInvalidate } from "@/lib/use-realtime";
 import { toast } from "sonner";
 import { Send, Loader2, MessageSquare } from "lucide-react";
 
@@ -30,7 +30,11 @@ function RealMessages({ title, subtitle }: { title: string; subtitle: string }) 
   const [to, setTo] = useState<string | null>(null);
   const [body, setBody] = useState("");
 
-  useRealtimeInvalidate(["messages"], [["msg-thread", to ?? ""]]);
+  useMessageRealtimeInvalidate({
+    userId: auth.user?.id,
+    schoolId: auth.appUser?.school_id,
+    queryKeys: [["msg-thread", to ?? ""], ["msg-users"], ["parent-dash"], ["teacher-dash"]],
+  });
 
   const users = useQuery({ queryKey: ["msg-users"], queryFn: () => fetchUsers() });
   const thread = useQuery({
@@ -62,7 +66,7 @@ function RealMessages({ title, subtitle }: { title: string; subtitle: string }) 
           ) : list.length === 0 ? (
             <div className="text-sm text-muted-foreground py-6 text-center">
               <MessageSquare className="h-6 w-6 mx-auto mb-2 opacity-50" />
-              No people yet. Invite teachers and parents from Admin → Invitations.
+              No contacts are available yet.
             </div>
           ) : (
             <ul className="space-y-1.5">
