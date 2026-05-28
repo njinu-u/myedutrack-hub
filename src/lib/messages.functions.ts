@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+type AppRole = "school_admin" | "teacher" | "counselor" | "parent" | "student" | "super_admin";
+
 export const listSchoolUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -13,7 +15,7 @@ export const listSchoolUsers = createServerFn({ method: "GET" })
     if (meError) throw new Error(meError.message);
     if (!me) return { users: [] };
 
-    const allowedRoles = me.role === "parent"
+    const allowedRoles: AppRole[] = me.role === "parent"
       ? ["school_admin", "teacher", "counselor"]
       : me.role === "school_admin" || me.role === "teacher" || me.role === "counselor"
         ? ["school_admin", "teacher", "counselor", "parent", "student"]
