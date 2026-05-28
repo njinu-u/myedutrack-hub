@@ -5,9 +5,25 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 export const listSchoolUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    const { data: me, error: meError } = await context.supabase
+      .from("app_users")
+      .select("role")
+      .eq("id", context.userId)
+      .maybeSingle();
+    if (meError) throw new Error(meError.message);
+    if (!me) return { users: [] };
+
+    const allowedRoles = me.role === "parent"
+      ? ["school_admin", "teacher", "counselor"]
+      : me.role === "school_admin" || me.role === "teacher" || me.role === "counselor"
+        ? ["school_admin", "teacher", "counselor", "parent", "student"]
+        : [];
+    if (allowedRoles.length === 0) return { users: [] };
+
     const { data, error } = await context.supabase
       .from("app_users")
       .select("id,full_name,email,role")
+      .in("role", allowedRoles)
       .order("full_name", { ascending: true });
     if (error) throw new Error(error.message);
     return { users: (data ?? []).filter((u) => u.id !== context.userId) };
@@ -40,6 +56,13 @@ export const sendMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: u } = await context.supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
     if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
+    const { data: recipient, error: recipientError } = await context.supabase
+      .from("app_users")
+      .select("id")
+      .eq("id", data.to_user_id)
+      .maybeSingle();
+    if (recipientError) throw new Error(recipientError.message);
+    if (!recipient) throw new Error("This recipient is not available for your school account.");
     const { error } = await context.supabase.from("messages").insert({
       from_user_id: context.userId,
       to_user_id: data.to_user_id,
