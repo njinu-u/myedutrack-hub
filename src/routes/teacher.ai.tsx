@@ -1,29 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
-import { AIBlock } from "@/components/ai-block";
 import { Sparkles, Send } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/teacher/ai")({ component: AIChat });
 
 const SUGGESTIONS = [
   "Which of my students are most at risk this week?",
-  "Generate a differentiated lesson plan for Grade 7 Math, algebraic expressions — 3 levels.",
-  "Write a progress report narrative for Amara based on her data.",
+  "Generate a differentiated lesson plan for my next class — 3 levels.",
+  "Write a progress report narrative for a selected student based on live data.",
   "What does the attendance pattern in my class suggest?",
 ];
 
-const REPLY = `Looking at your three classes (7B, 8A, 9A), three students stand out this week:
-
-1. Diego Alvarez (7B) — attendance 65%, Math down 17 points over 4 weeks. URGENT: counselor escalation appropriate.
-2. Kofi Mensah (7B) — Math down from 72 → 58 in 5 weeks. Mood trending negative. Recommend early teacher-parent touchpoint.
-3. Liam Chen (7B) — attendance 78%, English declining. Note transition support is active; coordinate with counselor.
-
-Want me to draft a parent message for any of them?`;
+const REPLY = "I can help analyze your live class data once student grades, attendance, observations, and wellbeing signals are available for your school.";
 
 function AIChat() {
+  const auth = useAuth();
+  const teacherName = auth.appUser?.full_name?.trim() || "there";
   const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([
-    { role: "ai", text: "Hi Ms. Odhiambo. I'm reading your live class data. Ask me anything." },
+    { role: "ai", text: `Hi ${teacherName}. I'm ready to help with your live class data. Ask me anything.` },
   ]);
   const [input, setInput] = useState("");
 
