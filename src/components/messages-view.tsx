@@ -23,6 +23,7 @@ export function MessagesView({ title, subtitle, demoBody }: { title: string; sub
 }
 
 function RealMessages({ title, subtitle }: { title: string; subtitle: string }) {
+  const auth = useAuth();
   const qc = useQueryClient();
   const fetchUsers = useServerFn(listSchoolUsers);
   const fetchThread = useServerFn(listThread);
