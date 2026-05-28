@@ -10,7 +10,7 @@ export const Route = createFileRoute("/parent")({
 function Layout() {
   usePortalGuard("parent");
   return (
-    <PortalLayout role="parent" nav={PARENT_NAV} brandSubtitle="Adwoa · Kofi's mother">
+    <PortalLayout role="parent" nav={PARENT_NAV}>
       <SubscriptionGate role="parent"><Outlet /></SubscriptionGate>
     </PortalLayout>
   );
