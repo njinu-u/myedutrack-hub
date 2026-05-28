@@ -6,7 +6,7 @@ import { AIBlock } from "@/components/ai-block";
 import { KOFI } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth";
 import { getParentDashboard } from "@/lib/dashboards.functions";
-import { useRealtimeInvalidate } from "@/lib/use-realtime";
+import { useMessageRealtimeInvalidate, useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Calendar, MessageCircle, FileText, GraduationCap, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/parent/")({ component: ParentHome });
@@ -19,7 +19,9 @@ function ParentHome() {
 function LiveParent() {
   const fn = useServerFn(getParentDashboard);
   const { data, isLoading } = useQuery({ queryKey: ["parent-dash"], queryFn: () => fn() });
-  useRealtimeInvalidate(["grades", "attendance", "messages"], [["parent-dash"]]);
+  useRealtimeInvalidate(["grades", "attendance"], [["parent-dash"]]);
+  const auth = useAuth();
+  useMessageRealtimeInvalidate({ userId: auth.user?.id, schoolId: auth.appUser?.school_id, queryKeys: [["parent-dash"]] });
 
   if (isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
 

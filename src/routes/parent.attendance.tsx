@@ -4,6 +4,10 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeInvalidate } from "@/lib/use-realtime";
 
 export const Route = createFileRoute("/parent/attendance")({ component: ParentAttendance });
 
@@ -11,6 +15,59 @@ const STATUSES = ["p","p","p","p","l","-","-","p","p","a","p","p","-","-","p","p
 const map = { p: { c: "bg-success/30 text-success", l: "P" }, a: { c: "bg-danger/30 text-danger", l: "A" }, l: { c: "bg-amber/30 text-amber", l: "L" }, "-": { c: "bg-secondary text-muted-foreground", l: "" } } as const;
 
 function ParentAttendance() {
+  const auth = useAuth();
+  return auth.isAuthed ? <LiveParentAttendance /> : <DemoParentAttendance />;
+}
+
+function LiveParentAttendance() {
+  const auth = useAuth();
+  const sid = auth.appUser?.linked_student_id;
+  useRealtimeInvalidate(["attendance"], [["parent-attendance", sid ?? ""]]);
+  const q = useQuery({
+    queryKey: ["parent-attendance", sid],
+    enabled: !!sid,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("attendance")
+        .select("date,status")
+        .eq("student_id", sid!)
+        .order("date", { ascending: false })
+        .limit(30);
+      if (error) throw new Error(error.message);
+      return data ?? [];
+    },
+  });
+
+  const rows = q.data ?? [];
+  const present = rows.filter((r) => r.status === "present").length;
+  const rate = rows.length ? Math.round((present / rows.length) * 100) : null;
+
+  return (
+    <div className="space-y-6">
+      <PageHead title="Attendance" subtitle={rate === null ? "Your child's attendance records." : `${rate}% attendance across recent records`} />
+      {!sid ? (
+        <Card className="text-center py-14"><p className="text-sm text-muted-foreground">Ask your school administrator to link your account to your child's profile.</p></Card>
+      ) : q.isLoading ? (
+        <Card><Loader2 className="h-5 w-5 animate-spin text-teal" /></Card>
+      ) : rows.length === 0 ? (
+        <Card className="text-center py-14"><p className="text-sm text-muted-foreground">No attendance records have been posted yet.</p></Card>
+      ) : (
+        <Card>
+          <ul className="space-y-2">
+            {rows.map((r) => (
+              <li key={r.date} className="flex items-center justify-between rounded-xl border p-3 text-sm">
+                <span>{new Date(r.date).toLocaleDateString()}</span>
+                <span className="capitalize text-muted-foreground">{r.status}</span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+function DemoParentAttendance() {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const submit = async () => {
