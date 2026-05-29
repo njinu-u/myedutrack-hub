@@ -108,13 +108,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_parent_user_id_fkey"
-            columns: ["parent_user_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "appointments_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -133,13 +126,6 @@ export type Database = {
             columns: ["teacher_user_id"]
             isOneToOne: false
             referencedRelation: "app_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_teacher_user_id_fkey"
-            columns: ["teacher_user_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
             referencedColumns: ["id"]
           },
         ]
@@ -178,13 +164,6 @@ export type Database = {
             columns: ["recorded_by"]
             isOneToOne: false
             referencedRelation: "app_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "attendance_recorded_by_fkey"
-            columns: ["recorded_by"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
             referencedColumns: ["id"]
           },
           {
@@ -240,13 +219,6 @@ export type Database = {
             columns: ["flagged_by"]
             isOneToOne: false
             referencedRelation: "app_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "counselor_flags_flagged_by_fkey"
-            columns: ["flagged_by"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
             referencedColumns: ["id"]
           },
           {
@@ -308,13 +280,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "grades_entered_by_fkey"
-            columns: ["entered_by"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "grades_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -373,13 +338,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "messages_from_user_id_fkey"
-            columns: ["from_user_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "messages_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -391,13 +349,6 @@ export type Database = {
             columns: ["to_user_id"]
             isOneToOne: false
             referencedRelation: "app_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_to_user_id_fkey"
-            columns: ["to_user_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
             referencedColumns: ["id"]
           },
         ]
@@ -493,13 +444,6 @@ export type Database = {
             referencedRelation: "app_users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "notifications_to_user_id_fkey"
-            columns: ["to_user_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
-            referencedColumns: ["id"]
-          },
         ]
       }
       observations: {
@@ -556,13 +500,6 @@ export type Database = {
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "app_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "observations_teacher_id_fkey"
-            columns: ["teacher_id"]
-            isOneToOne: false
-            referencedRelation: "school_staff_directory"
             referencedColumns: ["id"]
           },
         ]
@@ -727,38 +664,7 @@ export type Database = {
       }
     }
     Views: {
-      school_staff_directory: {
-        Row: {
-          avatar_url: string | null
-          full_name: string | null
-          id: string | null
-          role: Database["public"]["Enums"]["app_role"] | null
-          school_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          role?: Database["public"]["Enums"]["app_role"] | null
-          school_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          full_name?: string | null
-          id?: string | null
-          role?: Database["public"]["Enums"]["app_role"] | null
-          school_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "app_users_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       current_linked_student_id: { Args: never; Returns: string }
@@ -770,6 +676,15 @@ export type Database = {
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
+      }
+      list_school_staff: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
       }
     }
     Enums: {
