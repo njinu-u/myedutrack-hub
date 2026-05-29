@@ -15,11 +15,22 @@ export const listSchoolUsers = createServerFn({ method: "GET" })
     if (meError) throw new Error(meError.message);
     if (!me) return { users: [] };
 
-    const allowedRoles: AppRole[] = me.role === "parent"
-      ? ["school_admin", "teacher", "counselor"]
-      : me.role === "school_admin" || me.role === "teacher" || me.role === "counselor"
-        ? ["school_admin", "teacher", "counselor", "parent", "student"]
-        : [];
+    // Parents get a sanitized staff directory via security-definer RPC
+    // (no email/phone exposure).
+    if (me.role === "parent") {
+      const { data, error } = await (context.supabase as any).rpc("list_school_staff");
+      if (error) throw new Error(error.message);
+      const rows = (data ?? []) as Array<{ id: string; full_name: string | null; role: AppRole; avatar_url: string | null }>;
+      return {
+        users: rows
+          .map((r) => ({ id: r.id, full_name: r.full_name, email: null as string | null, role: r.role }))
+          .sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? "")),
+      };
+    }
+
+    const allowedRoles: AppRole[] = me.role === "school_admin" || me.role === "teacher" || me.role === "counselor"
+      ? ["school_admin", "teacher", "counselor", "parent", "student"]
+      : [];
     if (allowedRoles.length === 0) return { users: [] };
 
     const { data, error } = await context.supabase
