@@ -13,7 +13,7 @@ const CreateSchema = z.object({
 
 export const listObservations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { student_id?: string }) => d ?? {})
+  .inputValidator((d) => z.object({ student_id: z.string().uuid().optional() }).parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     let q = supabase
