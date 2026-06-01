@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { recordSecurityEvent } from "./security-events.functions";
+
 
 const PILOT_WEEKS = 12;
 const PILOT_MS = PILOT_WEEKS * 7 * 24 * 60 * 60 * 1000;
