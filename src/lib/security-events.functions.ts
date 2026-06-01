@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+
 export interface SecurityEvent {
   id: string;
   created_at: string;
@@ -13,7 +15,7 @@ export interface SecurityEvent {
   school_id: string | null;
   target_user_id: string | null;
   message: string;
-  details: Record<string, unknown>;
+  details: Json;
 }
 
 const ListSchema = z.object({
@@ -25,7 +27,7 @@ const ListSchema = z.object({
 export const listSecurityEvents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => ListSchema.parse(d ?? {}))
-  .handler(async ({ context, data }): Promise<SecurityEvent[]> => {
+  .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: me } = await supabase
       .from("app_users")
@@ -52,7 +54,7 @@ export async function recordSecurityEvent(args: {
   event_type: string;
   severity?: "info" | "low" | "medium" | "high" | "critical";
   message: string;
-  details?: Record<string, unknown>;
+  details?: Json;
   actor_user_id?: string | null;
   actor_email?: string | null;
   school_id?: string | null;
@@ -63,7 +65,7 @@ export async function recordSecurityEvent(args: {
       event_type: args.event_type,
       severity: args.severity ?? "info",
       message: args.message,
-      details: args.details ?? {},
+      details: (args.details ?? {}) as Json,
       actor_user_id: args.actor_user_id ?? null,
       actor_email: args.actor_email ?? null,
       school_id: args.school_id ?? null,
