@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { recordSecurityEvent } from "./security-events.functions";
+
 
 const PILOT_WEEKS = 12;
 const PILOT_MS = PILOT_WEEKS * 7 * 24 * 60 * 60 * 1000;
@@ -139,6 +141,14 @@ export const recordPaypalPayment = createServerFn({ method: "POST" })
       .eq("id", userId)
       .maybeSingle();
     if (!appUser || appUser.role !== "school_admin" || !appUser.school_id) {
+      await recordSecurityEvent({
+        event_type: "payment_unauthorized",
+        severity: "high",
+        message: "Non-admin attempted to record a payment",
+        actor_user_id: userId,
+        school_id: appUser?.school_id ?? null,
+        details: { role: appUser?.role ?? null, orderId: data.orderId },
+      });
       return { ok: false as const, error: "Only the school admin can complete payment." };
     }
 
@@ -149,12 +159,31 @@ export const recordPaypalPayment = createServerFn({ method: "POST" })
       .eq("paypal_order_id", data.orderId)
       .maybeSingle();
     if (existing && existing.id !== appUser.school_id) {
+      await recordSecurityEvent({
+        event_type: "payment_replay",
+        severity: "critical",
+        message: "PayPal order reuse attempt across schools",
+        actor_user_id: userId,
+        school_id: appUser.school_id,
+        details: { orderId: data.orderId, originalSchoolId: existing.id },
+      });
       return { ok: false as const, error: "This payment order has already been used." };
     }
 
     // Verify with PayPal server-side
     const verification = await verifyPaypalOrder(data.orderId);
-    if (!verification.ok) return { ok: false as const, error: verification.error };
+    if (!verification.ok) {
+      await recordSecurityEvent({
+        event_type: "payment_failed",
+        severity: "medium",
+        message: "PayPal order verification failed",
+        actor_user_id: userId,
+        school_id: appUser.school_id,
+        details: { orderId: data.orderId, reason: verification.error },
+      });
+      return { ok: false as const, error: verification.error };
+    }
+
 
     const paidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       .toISOString().slice(0, 10);
