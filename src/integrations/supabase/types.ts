@@ -624,6 +624,51 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          actor_email: string | null
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          ip_address: string | null
+          message: string
+          school_id: string | null
+          severity: string
+          target_user_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          school_id?: string | null
+          severity?: string
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          school_id?: string | null
+          severity?: string
+          target_user_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       students: {
         Row: {
           class_id: string | null
@@ -685,6 +730,17 @@ export type Database = {
           id: string
           role: Database["public"]["Enums"]["app_role"]
         }[]
+      }
+      log_security_event: {
+        Args: {
+          _details?: Json
+          _event_type: string
+          _message: string
+          _school_id?: string
+          _severity: string
+          _target_user_id?: string
+        }
+        Returns: string
       }
     }
     Enums: {
