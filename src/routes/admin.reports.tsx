@@ -5,10 +5,31 @@ import { Send, Languages, FileText, Check, Download, Loader2 } from "lucide-reac
 import { toast } from "sonner";
 import { useState } from "react";
 import { downloadPdf, downloadCsv } from "@/lib/export";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin/reports")({
-  component: Reports,
+  component: ReportsGate,
 });
+
+function ReportsGate() {
+  const auth = useAuth();
+  if (auth.isAuthed && !auth.isDemo) {
+    return (
+      <div className="space-y-6">
+        <PageHead title="Reports" subtitle="AI-drafted · teacher-refined · auto-translated · delivered to parents in their language." />
+        <Card className="text-center py-14">
+          <FileText className="h-7 w-7 mx-auto text-teal" />
+          <div className="font-display text-xl mt-3">No reports yet</div>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+            When teachers generate term reports for students, they will appear here for review,
+            translation, and delivery to parents.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+  return <Reports />;
+}
 
 const SAMPLE = `Kofi has had a mixed but encouraging term. His Science and English work continues to strengthen — he's now in the top third of Grade 7 in both subjects, with consistent improvement across the last five assessments. His teacher, Ms. Odhiambo, notes Kofi's growing confidence in class discussion and his willingness to ask questions when something isn't clear.
 
