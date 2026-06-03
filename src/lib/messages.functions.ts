@@ -69,13 +69,9 @@ export const sendMessage = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: u } = await context.supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
     if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
-    const { data: recipient, error: recipientError } = await context.supabase
-      .from("app_users")
-      .select("id")
-      .eq("id", data.to_user_id)
-      .maybeSingle();
-    if (recipientError) throw new Error(recipientError.message);
-    if (!recipient) throw new Error("This recipient is not available for your school account.");
+    // Recipient validity is enforced by the INSERT RLS policy on messages
+    // (same school + allowed role pairing). Parents do not have SELECT
+    // access on staff rows in app_users, so we skip a pre-check here.
     const { error } = await context.supabase.from("messages").insert({
       from_user_id: context.userId,
       to_user_id: data.to_user_id,
