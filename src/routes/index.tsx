@@ -357,8 +357,8 @@ function Footer() {
           <div className="text-xs uppercase tracking-wider text-white/50">Contact</div>
           <ul className="mt-3 space-y-2 text-sm text-white/80">
             <li>Nairobi, Kenya</li>
-            <li>hello@edutrack.school</li>
-            <li>+254 700 000 000</li>
+            <li><a href="mailto:christophernjinu@gmail.com" className="hover:text-white">christophernjinu@gmail.com</a></li>
+            <li><a href="tel:+254743594460" className="hover:text-white">+254 743 594 460</a></li>
           </ul>
         </div>
       </div>
