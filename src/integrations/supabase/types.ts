@@ -806,6 +806,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_send_message: {
+        Args: { _recipient: string; _sender: string }
+        Returns: boolean
+      }
       current_linked_student_id: { Args: never; Returns: string }
       current_school_id: { Args: never; Returns: string }
       current_user_role: {
