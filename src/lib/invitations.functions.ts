@@ -7,8 +7,9 @@ const ROLE = z.enum(["teacher", "counselor", "parent", "student"]);
 
 function genCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
   let out = "";
-  for (let i = 0; i < 8; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 8; i++) out += alphabet[bytes[i] % alphabet.length];
   return out;
 }
 
