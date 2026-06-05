@@ -53,6 +53,6 @@ export const markAttendance = createServerFn({ method: "POST" })
       school_id: u.school_id,
       recorded_by: context.userId,
     });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true };
   });

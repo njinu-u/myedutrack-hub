@@ -45,7 +45,7 @@ export const listSecurityEvents = createServerFn({ method: "POST" })
     if (data.severity) q = q.eq("severity", data.severity);
     if (data.event_type) q = q.eq("event_type", data.event_type);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return (rows ?? []) as SecurityEvent[];
   });
 

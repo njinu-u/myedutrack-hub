@@ -22,7 +22,7 @@ export const signupSchoolAdmin = createServerFn({ method: "POST" })
       user_metadata: { full_name: data.full_name },
     });
     if (cErr || !created.user) {
-      return { ok: false as const, error: cErr?.message ?? "Could not create account" };
+      { console.error("[server]", cErr); return { ok: false as const, error: "Could not create account. Please try again." }; }
     }
     const userId = created.user.id;
 
@@ -56,7 +56,7 @@ export const signupSchoolAdmin = createServerFn({ method: "POST" })
     });
     if (uErr) {
       await supabaseAdmin.auth.admin.deleteUser(userId);
-      return { ok: false as const, error: uErr.message };
+      { console.error("[server]", uErr); return { ok: false as const, error: "Could not complete signup. Please try again." }; }
     }
 
     return { ok: true as const, school_id: school.id };

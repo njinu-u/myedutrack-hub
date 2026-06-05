@@ -68,6 +68,6 @@ export const upsertGrade = createServerFn({ method: "POST" })
       school_id: u.school_id,
       entered_by: userId,
     });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true };
   });
