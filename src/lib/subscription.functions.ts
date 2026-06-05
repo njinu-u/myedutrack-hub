@@ -199,6 +199,6 @@ export const recordPaypalPayment = createServerFn({ method: "POST" })
         admin_user_id: userId,
       })
       .eq("id", appUser.school_id);
-    if (error) return { ok: false as const, error: error.message };
+    if (error) { console.error("[subscription]", error); return { ok: false as const, error: "Could not update subscription. Please try again." }; }
     return { ok: true as const, paidUntil };
   });

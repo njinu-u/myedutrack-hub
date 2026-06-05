@@ -23,7 +23,7 @@ export const listObservations = createServerFn({ method: "GET" })
       .limit(100);
     if (data.student_id) q = q.eq("student_id", data.student_id);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { observations: rows ?? [] };
   });
 
@@ -36,7 +36,7 @@ export const listMyStudents = createServerFn({ method: "GET" })
       .select("id,full_name,grade,class_id")
       .order("full_name", { ascending: true })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { students: data ?? [] };
   });
 
@@ -105,6 +105,6 @@ export const createObservation = createServerFn({ method: "POST" })
       })
       .select("id,student_id,subject,note,tags,ai_suggestions,created_at,teacher_id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { observation: row };
   });

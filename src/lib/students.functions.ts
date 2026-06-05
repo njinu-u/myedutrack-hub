@@ -27,7 +27,7 @@ export const createStudent = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { id: row.id };
   });
 
@@ -46,7 +46,7 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
       school_id: school.id,
     }));
     const { error, count } = await supabase.from("students").insert(payload, { count: "exact" });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { inserted: count ?? payload.length };
   });
 
@@ -57,7 +57,7 @@ export const listStudents = createServerFn({ method: "GET" })
       .from("students")
       .select("id,full_name,grade,class_id,photo_url,created_at")
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { students: data ?? [] };
   });
 
@@ -66,6 +66,6 @@ export const deleteStudent = createServerFn({ method: "POST" })
   .inputValidator((input) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("students").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true as const };
   });

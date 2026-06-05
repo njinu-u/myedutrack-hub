@@ -19,7 +19,7 @@ export const listSchoolUsers = createServerFn({ method: "GET" })
     // (no email/phone exposure).
     if (me.role === "parent") {
       const { data, error } = await (context.supabase as any).rpc("list_school_staff");
-      if (error) throw new Error(error.message);
+      if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
       const rows = (data ?? []) as Array<{ id: string; full_name: string | null; role: AppRole; avatar_url: string | null }>;
       return {
         users: rows
@@ -38,7 +38,7 @@ export const listSchoolUsers = createServerFn({ method: "GET" })
       .select("id,full_name,email,role")
       .in("role", allowedRoles)
       .order("full_name", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { users: (data ?? []).filter((u) => u.id !== context.userId) };
   });
 
@@ -53,7 +53,7 @@ export const listThread = createServerFn({ method: "POST" })
       .select("id,from_user_id,to_user_id,body,subject,sent_at,read_at")
       .or(`and(from_user_id.eq.${me},to_user_id.eq.${other}),and(from_user_id.eq.${other},to_user_id.eq.${me})`)
       .order("sent_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { messages: rows ?? [] };
   });
 
@@ -79,7 +79,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       subject: data.subject ?? null,
       school_id: u.school_id,
     }).select("id").maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
 
     // Best-effort recipient notification. Only staff roles satisfy the
     // notifications INSERT RLS policy; parents skip this step silently.

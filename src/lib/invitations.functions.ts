@@ -7,8 +7,9 @@ const ROLE = z.enum(["teacher", "counselor", "parent", "student"]);
 
 function genCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(8));
   let out = "";
-  for (let i = 0; i < 8; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 8; i++) out += alphabet[bytes[i] % alphabet.length];
   return out;
 }
 
@@ -21,7 +22,7 @@ export const listInvitations = createServerFn({ method: "GET" })
       .select("id,code,token,role,email,name,linked_student_id,expires_at,used_at,status,created_at")
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { invitations: data ?? [] };
   });
 
@@ -59,7 +60,7 @@ export const createInvitation = createServerFn({ method: "POST" })
       })
       .select("id,code,token,role,email,name,linked_student_id,expires_at,used_at,status,created_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
 
     return {
       invitation: row,
@@ -85,7 +86,7 @@ export const resendInvitation = createServerFn({ method: "POST" })
       .eq("school_id", me.school_id)
       .select("id,code,token,role,email,name,linked_student_id,expires_at,used_at,status,created_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
 
     const { data: school } = await supabase.from("schools").select("name").eq("id", me.school_id).maybeSingle();
     return { invitation: row, admin_name: me.full_name ?? "Your school admin", school_name: school?.name ?? "your school" };
@@ -105,7 +106,7 @@ export const cancelInvitation = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .eq("school_id", me.school_id)
       .is("used_at", null);
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true as const };
   });
 
@@ -177,7 +178,7 @@ export const redeemInvitation = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: { full_name: data.full_name },
     });
-    if (cErr || !created.user) return { ok: false as const, error: cErr?.message ?? "Could not create account" };
+    if (cErr || !created.user) { console.error("[server]", cErr); return { ok: false as const, error: "Could not create account. Please try again." }; }
 
     const { error: uErr } = await supabaseAdmin.from("app_users").insert({
       id: created.user.id,
@@ -189,7 +190,7 @@ export const redeemInvitation = createServerFn({ method: "POST" })
     });
     if (uErr) {
       await supabaseAdmin.auth.admin.deleteUser(created.user.id);
-      return { ok: false as const, error: uErr.message };
+      { console.error("[server]", uErr); return { ok: false as const, error: "Could not complete signup. Please try again." }; }
     }
 
     await supabaseAdmin
@@ -223,7 +224,7 @@ export const redeemInvitationByToken = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: { full_name: inv.name ?? inv.email },
     });
-    if (cErr || !created.user) return { ok: false as const, error: cErr?.message ?? "Could not create account" };
+    if (cErr || !created.user) { console.error("[server]", cErr); return { ok: false as const, error: "Could not create account. Please try again." }; }
 
     const { error: uErr } = await supabaseAdmin.from("app_users").insert({
       id: created.user.id,
@@ -235,7 +236,7 @@ export const redeemInvitationByToken = createServerFn({ method: "POST" })
     });
     if (uErr) {
       await supabaseAdmin.auth.admin.deleteUser(created.user.id);
-      return { ok: false as const, error: uErr.message };
+      { console.error("[server]", uErr); return { ok: false as const, error: "Could not complete signup. Please try again." }; }
     }
 
     await supabaseAdmin

@@ -41,7 +41,7 @@ export const bookAppointment = createServerFn({ method: "POST" })
       school_id: appUser.school_id,
       parent_user_id: context.userId,
     });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true };
   });
 
@@ -63,6 +63,6 @@ export const submitMoodCheckin = createServerFn({ method: "POST" })
       school_id: appUser.school_id,
       student_id: appUser.linked_student_id,
     });
-    if (error) throw new Error(error.message);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true };
   });
