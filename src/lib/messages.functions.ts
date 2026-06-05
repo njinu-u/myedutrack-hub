@@ -67,18 +67,33 @@ export const sendMessage = createServerFn({ method: "POST" })
     }).parse(i)
   )
   .handler(async ({ data, context }) => {
-    const { data: u } = await context.supabase.from("app_users").select("school_id").eq("id", context.userId).maybeSingle();
+    const { data: u } = await context.supabase.from("app_users").select("school_id,full_name,email,role").eq("id", context.userId).maybeSingle();
     if (!u?.school_id) throw new Error("No school linked to your account. Please contact your school admin.");
     // Recipient validity is enforced by the INSERT RLS policy on messages
     // (same school + allowed role pairing). Parents do not have SELECT
     // access on staff rows in app_users, so we skip a pre-check here.
-    const { error } = await context.supabase.from("messages").insert({
+    const { data: inserted, error } = await context.supabase.from("messages").insert({
       from_user_id: context.userId,
       to_user_id: data.to_user_id,
       body: data.body,
       subject: data.subject ?? null,
       school_id: u.school_id,
-    });
+    }).select("id").maybeSingle();
     if (error) throw new Error(error.message);
+
+    // Best-effort recipient notification. Only staff roles satisfy the
+    // notifications INSERT RLS policy; parents skip this step silently.
+    if (u.role === "school_admin" || u.role === "teacher" || u.role === "counselor") {
+      const senderName = u.full_name ?? u.email ?? "Someone";
+      const preview = data.body.length > 80 ? data.body.slice(0, 77) + "…" : data.body;
+      await context.supabase.from("notifications").insert({
+        to_user_id: data.to_user_id,
+        school_id: u.school_id,
+        type: "message",
+        message: `${senderName}: ${preview}`,
+        related_id: inserted?.id ?? null,
+        link: "/notifications",
+      });
+    }
     return { ok: true };
   });
