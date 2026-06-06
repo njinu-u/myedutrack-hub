@@ -48,6 +48,7 @@ function RealGrades() {
 
   const sQ = useQuery({ queryKey: ["all-students"], queryFn: () => fetchList() });
   const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+  const tQ = useQuery({ queryKey: ["school-taxonomy"], queryFn: () => fetchTaxonomy() });
 
   // subjects the teacher teaches (deduped, non-empty)
   const mySubjects = useMemo(() => {
