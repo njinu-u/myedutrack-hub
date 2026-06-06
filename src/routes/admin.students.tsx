@@ -66,11 +66,17 @@ function StudentsPage() {
       const created = await addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } });
       const studentId = created.id;
       const followups: Array<{ kind: "parent" | "student"; payload: Awaited<ReturnType<typeof invite>> }> = [];
-      if (parentEmail.trim()) {
-        const res = await invite({
-          data: { role: "parent", name: `Parent of ${newName.trim()}`, email: parentEmail.trim(), linked_student_id: studentId },
-        });
-        followups.push({ kind: "parent", payload: res });
+      const parentEmails = parentEmail.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      for (const pe of parentEmails) {
+        try {
+          const res = await invite({
+            data: { role: "parent", name: `Parent of ${newName.trim()}`, email: pe, linked_student_id: studentId },
+          });
+          followups.push({ kind: "parent", payload: res });
+        } catch (err) {
+          console.error("parent invite failed", pe, err);
+          toast.error(`Could not invite ${pe}`);
+        }
       }
       if (studentEmail.trim()) {
         const res = await invite({
@@ -82,7 +88,7 @@ function StudentsPage() {
     },
     onSuccess: ({ followups, studentName }) => {
       toast.success("Student added");
-      for (const { kind, payload } of followups) {
+      followups.forEach(({ kind, payload }, idx) => {
         const url = buildInviteUrl(payload.invitation.token);
         const { subject, body } = buildInviteEmail({
           role: kind,
@@ -93,9 +99,9 @@ function StudentsPage() {
           invite_url: url,
           student_name: studentName,
         });
-        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), kind === "parent" ? 200 : 1000);
-      }
-      if (followups.length > 0) toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      if (followups.length > 0) toast(`${followups.length} invitation${followups.length>1?"s":""} saved. Please send the emails opening in Gmail.`, { duration: 6000 });
       setAddOpen(false);
       setNewName(""); setNewGrade(""); setNewClass(""); setParentEmail(""); setStudentEmail("");
       qc.invalidateQueries({ queryKey: ["admin-students"] });
