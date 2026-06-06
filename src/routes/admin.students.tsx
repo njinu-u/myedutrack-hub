@@ -60,6 +60,50 @@ function StudentsPage() {
   const [newClass, setNewClass] = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
+  const [inviteFor, setInviteFor] = useState<{ id: string; name: string } | null>(null);
+  const [inviteEmails, setInviteEmails] = useState("");
+
+  const inviteMut = useMutation({
+    mutationFn: async () => {
+      if (!inviteFor) return { sent: [] as Awaited<ReturnType<typeof invite>>[] };
+      const emails = inviteEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      if (emails.length === 0) throw new Error("Add at least one email");
+      const results: Awaited<ReturnType<typeof invite>>[] = [];
+      for (const em of emails) {
+        try {
+          const res = await invite({
+            data: { role: "parent", name: `Parent of ${inviteFor.name}`, email: em, linked_student_id: inviteFor.id },
+          });
+          results.push(res);
+        } catch (err) {
+          console.error("invite failed", em, err);
+          toast.error(`Could not invite ${em}`);
+        }
+      }
+      return { sent: results };
+    },
+    onSuccess: ({ sent }) => {
+      if (sent.length === 0) return;
+      sent.forEach((payload, idx) => {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: "parent",
+          recipient_name: "there",
+          recipient_email: payload.invitation.email!,
+          school_name: payload.school_name,
+          admin_name: payload.admin_name,
+          invite_url: url,
+          student_name: inviteFor?.name,
+        });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      toast.success(`${sent.length} parent invitation${sent.length>1?"s":""} saved. Sending emails open in Gmail.`);
+      setInviteFor(null);
+      setInviteEmails("");
+      qc.invalidateQueries({ queryKey: ["invitations"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const addMut = useMutation({
     mutationFn: async () => {
