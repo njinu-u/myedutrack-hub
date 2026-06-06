@@ -9,16 +9,23 @@ const StudentInput = z.object({
   grade: z.string().trim().max(50).optional().nullable(),
   class_id: z.string().trim().max(50).optional().nullable(),
   photo_url: z.string().url().max(500).optional().nullable(),
+  email: z.string().trim().max(255).optional().nullable(),
+  external_id: z.string().trim().max(120).optional().nullable(),
   custom_fields: CustomFields,
 });
+
+async function getMySchoolId(supabase: { from: (t: string) => { select: (cols: string) => { eq: (col: string, val: string) => { maybeSingle: () => Promise<{ data: { school_id: string | null } | null }> } } } }, userId: string): Promise<string | null> {
+  const { data } = await supabase.from("app_users").select("school_id").eq("id", userId).maybeSingle();
+  return data?.school_id ?? null;
+}
 
 export const createStudent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => StudentInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: school } = await supabase.from("schools").select("id").maybeSingle();
-    if (!school) throw new Error("No school found for current user");
+    const { supabase, userId } = context;
+    const schoolId = await getMySchoolId(supabase as never, userId);
+    if (!schoolId) throw new Error("No school found for current user");
     const { data: row, error } = await supabase
       .from("students")
       .insert({
@@ -26,8 +33,10 @@ export const createStudent = createServerFn({ method: "POST" })
         grade: data.grade ?? null,
         class_id: data.class_id ?? null,
         photo_url: data.photo_url ?? null,
+        email: data.email?.trim() || null,
+        external_id: data.external_id?.trim() || null,
         custom_fields: data.custom_fields ?? {},
-        school_id: school.id,
+        school_id: schoolId,
       })
       .select("id")
       .single();
@@ -35,24 +44,85 @@ export const createStudent = createServerFn({ method: "POST" })
     return { id: row.id };
   });
 
+export type BulkImportSummary = {
+  added: number;
+  updated: number;
+  failed: { row: number; reason: string }[];
+};
+
 export const bulkCreateStudents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ rows: z.array(StudentInput).min(1).max(2000) }).parse(input))
-  .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: school } = await supabase.from("schools").select("id").maybeSingle();
-    if (!school) throw new Error("No school found for current user");
-    const payload = data.rows.map((r) => ({
-      full_name: r.full_name?.trim() || "Unnamed Student",
-      grade: r.grade ?? null,
-      class_id: r.class_id ?? null,
-      photo_url: r.photo_url ?? null,
-      custom_fields: r.custom_fields ?? {},
-      school_id: school.id,
-    }));
-    const { error, count } = await supabase.from("students").insert(payload, { count: "exact" });
-    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
-    return { inserted: count ?? payload.length };
+  .handler(async ({ data, context }): Promise<BulkImportSummary> => {
+    const { supabase, userId } = context;
+    const schoolId = await getMySchoolId(supabase as never, userId);
+    if (!schoolId) throw new Error("No school found for current user");
+
+    const summary: BulkImportSummary = { added: 0, updated: 0, failed: [] };
+
+    // Pre-fetch existing students in this school for dedupe by email or external_id
+    const { data: existing } = await supabase
+      .from("students")
+      .select("id,email,external_id")
+      .eq("school_id", schoolId);
+    const byEmail = new Map<string, string>();
+    const byExt = new Map<string, string>();
+    for (const s of existing ?? []) {
+      const e = (s as { email?: string | null }).email;
+      const x = (s as { external_id?: string | null }).external_id;
+      if (e) byEmail.set(e.toLowerCase(), s.id as string);
+      if (x) byExt.set(x, s.id as string);
+    }
+
+    for (let i = 0; i < data.rows.length; i++) {
+      const r = data.rows[i];
+      const fullName = r.full_name?.trim() ?? "";
+      const email = r.email?.trim() || null;
+      const externalId = r.external_id?.trim() || null;
+
+      if (!fullName) {
+        summary.failed.push({ row: i + 1, reason: "Missing required field: Full name" });
+        continue;
+      }
+
+      const existingId =
+        (email && byEmail.get(email.toLowerCase())) ||
+        (externalId && byExt.get(externalId)) ||
+        null;
+
+      const payload = {
+        full_name: fullName,
+        grade: r.grade ?? null,
+        class_id: r.class_id ?? null,
+        photo_url: r.photo_url ?? null,
+        email,
+        external_id: externalId,
+        custom_fields: r.custom_fields ?? {},
+        school_id: schoolId,
+      };
+
+      if (existingId) {
+        const { error } = await supabase.from("students").update(payload).eq("id", existingId).eq("school_id", schoolId);
+        if (error) {
+          console.error("[server] update failed", error);
+          summary.failed.push({ row: i + 1, reason: "Could not update existing record" });
+        } else {
+          summary.updated += 1;
+        }
+      } else {
+        const { data: ins, error } = await supabase.from("students").insert(payload).select("id,email,external_id").single();
+        if (error) {
+          console.error("[server] insert failed", error);
+          summary.failed.push({ row: i + 1, reason: "Could not save row" });
+        } else {
+          summary.added += 1;
+          if (ins.email) byEmail.set((ins.email as string).toLowerCase(), ins.id as string);
+          if (ins.external_id) byExt.set(ins.external_id as string, ins.id as string);
+        }
+      }
+    }
+
+    return summary;
   });
 
 export const listStudents = createServerFn({ method: "GET" })
@@ -60,7 +130,7 @@ export const listStudents = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("students")
-      .select("id,full_name,grade,class_id,photo_url,custom_fields,created_at")
+      .select("id,full_name,grade,class_id,photo_url,email,external_id,custom_fields,created_at")
       .order("created_at", { ascending: false });
     if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { students: data ?? [] };
