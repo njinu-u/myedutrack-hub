@@ -9,6 +9,8 @@ const StudentInput = z.object({
   grade: z.string().trim().max(50).optional().nullable(),
   class_id: z.string().trim().max(50).optional().nullable(),
   photo_url: z.string().url().max(500).optional().nullable(),
+  email: z.string().trim().max(255).optional().nullable(),
+  external_id: z.string().trim().max(120).optional().nullable(),
   custom_fields: CustomFields,
 });
 
