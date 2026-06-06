@@ -29,6 +29,7 @@ import { Route as StudentIndexRouteImport } from './routes/student.index'
 import { Route as ParentIndexRouteImport } from './routes/parent.index'
 import { Route as CounselorIndexRouteImport } from './routes/counselor.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as TeacherSetupRouteImport } from './routes/teacher.setup'
 import { Route as TeacherReportsRouteImport } from './routes/teacher.reports'
 import { Route as TeacherObservationsRouteImport } from './routes/teacher.observations'
 import { Route as TeacherMessagesRouteImport } from './routes/teacher.messages'
@@ -50,10 +51,12 @@ import { Route as ParentAppointmentsRouteImport } from './routes/parent.appointm
 import { Route as JoinCodeRouteImport } from './routes/join.$code'
 import { Route as CounselorWellbeingRouteImport } from './routes/counselor.wellbeing'
 import { Route as CounselorStudentsRouteImport } from './routes/counselor.students'
+import { Route as CounselorSetupRouteImport } from './routes/counselor.setup'
 import { Route as CounselorSessionsRouteImport } from './routes/counselor.sessions'
 import { Route as CounselorRiskRouteImport } from './routes/counselor.risk'
 import { Route as CounselorInterventionsRouteImport } from './routes/counselor.interventions'
 import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
+import { Route as AdminTaxonomyRouteImport } from './routes/admin.taxonomy'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -167,6 +170,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const TeacherSetupRoute = TeacherSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherReportsRoute = TeacherReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -272,6 +280,11 @@ const CounselorStudentsRoute = CounselorStudentsRouteImport.update({
   path: '/students',
   getParentRoute: () => CounselorRoute,
 } as any)
+const CounselorSetupRoute = CounselorSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => CounselorRoute,
+} as any)
 const CounselorSessionsRoute = CounselorSessionsRouteImport.update({
   id: '/sessions',
   path: '/sessions',
@@ -290,6 +303,11 @@ const CounselorInterventionsRoute = CounselorInterventionsRouteImport.update({
 const AdminTimetableRoute = AdminTimetableRouteImport.update({
   id: '/timetable',
   path: '/timetable',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTaxonomyRoute = AdminTaxonomyRouteImport.update({
+  id: '/taxonomy',
+  path: '/taxonomy',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminStudentsRoute = AdminStudentsRouteImport.update({
@@ -380,10 +398,12 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
+  '/admin/taxonomy': typeof AdminTaxonomyRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/counselor/interventions': typeof CounselorInterventionsRoute
   '/counselor/risk': typeof CounselorRiskRoute
   '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/setup': typeof CounselorSetupRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
   '/join/$code': typeof JoinCodeRoute
@@ -405,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/teacher/setup': typeof TeacherSetupRoute
   '/admin/': typeof AdminIndexRoute
   '/counselor/': typeof CounselorIndexRoute
   '/parent/': typeof ParentIndexRoute
@@ -434,10 +455,12 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
+  '/admin/taxonomy': typeof AdminTaxonomyRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/counselor/interventions': typeof CounselorInterventionsRoute
   '/counselor/risk': typeof CounselorRiskRoute
   '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/setup': typeof CounselorSetupRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
   '/join/$code': typeof JoinCodeRoute
@@ -459,6 +482,7 @@ export interface FileRoutesByTo {
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/teacher/setup': typeof TeacherSetupRoute
   '/admin': typeof AdminIndexRoute
   '/counselor': typeof CounselorIndexRoute
   '/parent': typeof ParentIndexRoute
@@ -494,10 +518,12 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
+  '/admin/taxonomy': typeof AdminTaxonomyRoute
   '/admin/timetable': typeof AdminTimetableRoute
   '/counselor/interventions': typeof CounselorInterventionsRoute
   '/counselor/risk': typeof CounselorRiskRoute
   '/counselor/sessions': typeof CounselorSessionsRoute
+  '/counselor/setup': typeof CounselorSetupRoute
   '/counselor/students': typeof CounselorStudentsRoute
   '/counselor/wellbeing': typeof CounselorWellbeingRoute
   '/join/$code': typeof JoinCodeRoute
@@ -519,6 +545,7 @@ export interface FileRoutesById {
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/observations': typeof TeacherObservationsRoute
   '/teacher/reports': typeof TeacherReportsRoute
+  '/teacher/setup': typeof TeacherSetupRoute
   '/admin/': typeof AdminIndexRoute
   '/counselor/': typeof CounselorIndexRoute
   '/parent/': typeof ParentIndexRoute
@@ -555,10 +582,12 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/students'
+    | '/admin/taxonomy'
     | '/admin/timetable'
     | '/counselor/interventions'
     | '/counselor/risk'
     | '/counselor/sessions'
+    | '/counselor/setup'
     | '/counselor/students'
     | '/counselor/wellbeing'
     | '/join/$code'
@@ -580,6 +609,7 @@ export interface FileRouteTypes {
     | '/teacher/messages'
     | '/teacher/observations'
     | '/teacher/reports'
+    | '/teacher/setup'
     | '/admin/'
     | '/counselor/'
     | '/parent/'
@@ -609,10 +639,12 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/students'
+    | '/admin/taxonomy'
     | '/admin/timetable'
     | '/counselor/interventions'
     | '/counselor/risk'
     | '/counselor/sessions'
+    | '/counselor/setup'
     | '/counselor/students'
     | '/counselor/wellbeing'
     | '/join/$code'
@@ -634,6 +666,7 @@ export interface FileRouteTypes {
     | '/teacher/messages'
     | '/teacher/observations'
     | '/teacher/reports'
+    | '/teacher/setup'
     | '/admin'
     | '/counselor'
     | '/parent'
@@ -668,10 +701,12 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/students'
+    | '/admin/taxonomy'
     | '/admin/timetable'
     | '/counselor/interventions'
     | '/counselor/risk'
     | '/counselor/sessions'
+    | '/counselor/setup'
     | '/counselor/students'
     | '/counselor/wellbeing'
     | '/join/$code'
@@ -693,6 +728,7 @@ export interface FileRouteTypes {
     | '/teacher/messages'
     | '/teacher/observations'
     | '/teacher/reports'
+    | '/teacher/setup'
     | '/admin/'
     | '/counselor/'
     | '/parent/'
@@ -862,6 +898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/teacher/setup': {
+      id: '/teacher/setup'
+      path: '/setup'
+      fullPath: '/teacher/setup'
+      preLoaderRoute: typeof TeacherSetupRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/reports': {
       id: '/teacher/reports'
       path: '/reports'
@@ -1009,6 +1052,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CounselorStudentsRouteImport
       parentRoute: typeof CounselorRoute
     }
+    '/counselor/setup': {
+      id: '/counselor/setup'
+      path: '/setup'
+      fullPath: '/counselor/setup'
+      preLoaderRoute: typeof CounselorSetupRouteImport
+      parentRoute: typeof CounselorRoute
+    }
     '/counselor/sessions': {
       id: '/counselor/sessions'
       path: '/sessions'
@@ -1035,6 +1085,13 @@ declare module '@tanstack/react-router' {
       path: '/timetable'
       fullPath: '/admin/timetable'
       preLoaderRoute: typeof AdminTimetableRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/taxonomy': {
+      id: '/admin/taxonomy'
+      path: '/taxonomy'
+      fullPath: '/admin/taxonomy'
+      preLoaderRoute: typeof AdminTaxonomyRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/students': {
@@ -1148,6 +1205,7 @@ interface AdminRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStudentsRoute: typeof AdminStudentsRouteWithChildren
+  AdminTaxonomyRoute: typeof AdminTaxonomyRoute
   AdminTimetableRoute: typeof AdminTimetableRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -1164,6 +1222,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminStudentsRoute: AdminStudentsRouteWithChildren,
+  AdminTaxonomyRoute: AdminTaxonomyRoute,
   AdminTimetableRoute: AdminTimetableRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
@@ -1174,6 +1233,7 @@ interface CounselorRouteChildren {
   CounselorInterventionsRoute: typeof CounselorInterventionsRoute
   CounselorRiskRoute: typeof CounselorRiskRoute
   CounselorSessionsRoute: typeof CounselorSessionsRoute
+  CounselorSetupRoute: typeof CounselorSetupRoute
   CounselorStudentsRoute: typeof CounselorStudentsRoute
   CounselorWellbeingRoute: typeof CounselorWellbeingRoute
   CounselorIndexRoute: typeof CounselorIndexRoute
@@ -1183,6 +1243,7 @@ const CounselorRouteChildren: CounselorRouteChildren = {
   CounselorInterventionsRoute: CounselorInterventionsRoute,
   CounselorRiskRoute: CounselorRiskRoute,
   CounselorSessionsRoute: CounselorSessionsRoute,
+  CounselorSetupRoute: CounselorSetupRoute,
   CounselorStudentsRoute: CounselorStudentsRoute,
   CounselorWellbeingRoute: CounselorWellbeingRoute,
   CounselorIndexRoute: CounselorIndexRoute,
@@ -1243,6 +1304,7 @@ interface TeacherRouteChildren {
   TeacherMessagesRoute: typeof TeacherMessagesRoute
   TeacherObservationsRoute: typeof TeacherObservationsRoute
   TeacherReportsRoute: typeof TeacherReportsRoute
+  TeacherSetupRoute: typeof TeacherSetupRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
 }
 
@@ -1255,6 +1317,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherMessagesRoute: TeacherMessagesRoute,
   TeacherObservationsRoute: TeacherObservationsRoute,
   TeacherReportsRoute: TeacherReportsRoute,
+  TeacherSetupRoute: TeacherSetupRoute,
   TeacherIndexRoute: TeacherIndexRoute,
 }
 
