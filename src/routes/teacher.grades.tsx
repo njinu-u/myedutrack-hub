@@ -47,13 +47,12 @@ function RealGrades() {
 
   const sQ = useQuery({ queryKey: ["all-students"], queryFn: () => fetchList() });
   const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+  const { subjects: schoolSubjects, isLoading: taxLoading } = useSchoolTaxonomy();
 
-  // subjects the teacher teaches (deduped, non-empty)
+  // subjects from school taxonomy (admin-configured)
   const mySubjects = useMemo(() => {
-    const s = new Set<string>();
-    for (const a of aQ.data?.items ?? []) if (a.subject) s.add(a.subject);
-    return [...s];
-  }, [aQ.data]);
+    return schoolSubjects.filter((s) => s.trim().length > 0);
+  }, [schoolSubjects]);
 
   // class labels the teacher is assigned to
   const myClassLabels = useMemo(() => {
