@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2 } from "lucide-react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2, Mail } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
