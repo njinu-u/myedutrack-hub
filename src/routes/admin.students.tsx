@@ -154,7 +154,7 @@ function StudentsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const [importSummary, setImportSummary] = useState<{ added: number; updated: number; failed: { row: number; reason: string }[] } | null>(null);
+  const [importSummary, setImportSummary] = useState<{ added: number; updated: number; failed: { row: number; reason: string }[]; parents: { student_id: string; student_name: string; emails: string[] }[] } | null>(null);
 
   const importMut = useMutation({
     mutationFn: (rows: ImportedRow[]) => bulkAdd({
@@ -173,12 +173,46 @@ function StudentsPage() {
     onSuccess: (res) => {
       setImportSummary(res);
       setImportOpen(false);
+      const parentCount = res.parents.reduce((n, p) => n + p.emails.length, 0);
       if (res.added + res.updated > 0) {
-        toast.success(`Import complete: ${res.added} added, ${res.updated} updated${res.failed.length ? `, ${res.failed.length} failed` : ""}`);
+        toast.success(`Import complete: ${res.added} added, ${res.updated} updated${res.failed.length ? `, ${res.failed.length} failed` : ""}${parentCount ? ` · ${parentCount} parent email${parentCount>1?"s":""} detected` : ""}`);
       } else if (res.failed.length > 0) {
         toast.error(`Import failed: ${res.failed.length} row${res.failed.length>1?"s":""} could not be saved`);
       }
       qc.invalidateQueries({ queryKey: ["admin-students"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const bulkInviteMut = useMutation({
+    mutationFn: async (entries: { student_id: string; student_name: string; emails: string[] }[]) => {
+      const payloads: { email: string; student_name: string; res: Awaited<ReturnType<typeof invite>> }[] = [];
+      for (const entry of entries) {
+        for (const em of entry.emails) {
+          try {
+            const res = await invite({
+              data: { role: "parent", name: `Parent of ${entry.student_name}`, email: em, linked_student_id: entry.student_id },
+            });
+            payloads.push({ email: em, student_name: entry.student_name, res });
+          } catch (err) {
+            console.error("bulk invite failed", em, err);
+          }
+        }
+      }
+      return payloads;
+    },
+    onSuccess: (payloads) => {
+      if (payloads.length === 0) { toast.error("No invitations could be created"); return; }
+      payloads.forEach(({ email, student_name, res }, idx) => {
+        const url = buildInviteUrl(res.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: "parent", recipient_name: "there", recipient_email: email,
+          school_name: res.school_name, admin_name: res.admin_name, invite_url: url, student_name,
+        });
+        setTimeout(() => openGmailCompose({ to: email, subject, body }), 300 + idx * 800);
+      });
+      toast.success(`${payloads.length} parent invitation${payloads.length>1?"s":""} saved. Gmail tabs will open to send.`);
+      qc.invalidateQueries({ queryKey: ["invitations"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
