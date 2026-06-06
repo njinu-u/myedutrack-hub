@@ -5,15 +5,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listGradesForClass, upsertGrade } from "@/lib/grades.functions";
 import { listStudents } from "@/lib/students.functions";
+import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Save, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
-const SUBJECTS = ["Math", "English", "Science", "History", "Geography", "Art", "PE"];
 const TERMS = ["Term 1", "Term 2", "Term 3"];
 
 function TeacherGrades() {
@@ -34,26 +35,50 @@ function RealGrades() {
   const qc = useQueryClient();
   const fetchList = useServerFn(listStudents);
   const fetchGrades = useServerFn(listGradesForClass);
+  const fetchAssignments = useServerFn(getMyTeacherAssignments);
   const save = useServerFn(upsertGrade);
 
-  const [subject, setSubject] = useState(SUBJECTS[0]);
+  const [subject, setSubject] = useState<string>("");
   const [term, setTerm] = useState(TERMS[1]);
   const [classKey, setClassKey] = useState<string>("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const sQ = useQuery({ queryKey: ["all-students"], queryFn: () => fetchList() });
+  const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+
+  // subjects the teacher teaches (deduped, non-empty)
+  const mySubjects = useMemo(() => {
+    const s = new Set<string>();
+    for (const a of aQ.data?.items ?? []) if (a.subject) s.add(a.subject);
+    return [...s];
+  }, [aQ.data]);
+
+  // class labels the teacher is assigned to
+  const myClassLabels = useMemo(() => {
+    const s = new Set<string>();
+    for (const a of aQ.data?.items ?? []) s.add(a.class_label);
+    return s;
+  }, [aQ.data]);
+
   const classes = useMemo(() => {
     const set = new Map<string, string>();
     for (const s of sQ.data?.students ?? []) {
       const key = s.class_id ? `class:${s.class_id}` : s.grade ? `grade:${s.grade}` : "";
       const label = s.class_id ? `Class ${s.class_id}` : s.grade ? `Grade ${s.grade}` : "Unassigned";
-      if (key) set.set(key, label);
+      if (!key) continue;
+      // filter to classes the teacher teaches (match by class_id or grade label)
+      if (myClassLabels.size > 0) {
+        const raw = s.class_id ?? s.grade ?? "";
+        if (!myClassLabels.has(raw) && !myClassLabels.has(label)) continue;
+      }
+      set.set(key, label);
     }
     return [...set.entries()].map(([k, v]) => ({ key: k, label: v }));
-  }, [sQ.data]);
+  }, [sQ.data, myClassLabels]);
 
   useEffect(() => { if (!classKey && classes.length) setClassKey(classes[0].key); }, [classes, classKey]);
+  useEffect(() => { if (!subject && mySubjects.length) setSubject(mySubjects[0]); }, [mySubjects, subject]);
 
   const class_id = classKey.startsWith("class:") ? classKey.slice(6) : null;
   const grade = classKey.startsWith("grade:") ? classKey.slice(6) : null;
@@ -62,7 +87,7 @@ function RealGrades() {
 
   const gQ = useQuery({
     queryKey: ["teacher-grades", classKey, subject, term],
-    enabled: !!classKey,
+    enabled: !!classKey && !!subject,
     queryFn: () => fetchGrades({ data: { class_id, grade, subject, term } }),
   });
 
