@@ -2,8 +2,11 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { deleteOwnAccount } from "@/lib/account.functions";
 import { toast } from "sonner";
-import { Camera, Loader2, ArrowLeft } from "lucide-react";
+import { Camera, Loader2, ArrowLeft, Trash2, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — EduTrack" }] }),
