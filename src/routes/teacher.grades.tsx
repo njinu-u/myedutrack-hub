@@ -6,12 +6,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { listGradesForClass, upsertGrade } from "@/lib/grades.functions";
 import { listStudents } from "@/lib/students.functions";
 import { getMyTeacherAssignments } from "@/lib/assignments.functions";
-import { useSchoolTaxonomy } from "@/lib/use-school-taxonomy";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Save, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
@@ -46,12 +46,13 @@ function RealGrades() {
 
   const sQ = useQuery({ queryKey: ["all-students"], queryFn: () => fetchList() });
   const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
-  const { subjects: schoolSubjects, isLoading: taxLoading } = useSchoolTaxonomy();
 
-  // subjects from school taxonomy (admin-configured)
+  // subjects the teacher teaches (deduped, non-empty)
   const mySubjects = useMemo(() => {
-    return schoolSubjects.filter((s) => s.trim().length > 0);
-  }, [schoolSubjects]);
+    const s = new Set<string>();
+    for (const a of aQ.data?.items ?? []) if (a.subject) s.add(a.subject);
+    return [...s];
+  }, [aQ.data]);
 
   // class labels the teacher is assigned to
   const myClassLabels = useMemo(() => {
@@ -122,7 +123,7 @@ function RealGrades() {
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {mySubjects.length === 0 && <option value="">No subjects configured</option>}
+              {mySubjects.length === 0 && <option value="">No subjects assigned</option>}
               {mySubjects.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
@@ -132,12 +133,12 @@ function RealGrades() {
         }
       />
       <Card>
-        {(sQ.isLoading || aQ.isLoading || gQ.isLoading || taxLoading) ? (
+        {(sQ.isLoading || aQ.isLoading || gQ.isLoading) ? (
           <div className="py-10 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-teal" /></div>
         ) : mySubjects.length === 0 ? (
           <div className="py-12 text-center">
             <BookOpen className="h-6 w-6 mx-auto text-teal" />
-            <p className="text-sm text-muted-foreground mt-3">No subjects configured — please contact your administrator.</p>
+            <p className="text-sm text-muted-foreground mt-3">You have no subjects assigned yet. Set them up in <Link to="/teacher/setup" className="font-medium underline">Teacher → Setup</Link>.</p>
           </div>
         ) : classes.length === 0 ? (
           <div className="py-12 text-center">
