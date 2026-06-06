@@ -14,9 +14,9 @@ const StudentInput = z.object({
   custom_fields: CustomFields,
 });
 
-async function getMySchoolId(supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>, userId: string): Promise<string | null> {
+async function getMySchoolId(supabase: { from: (t: string) => { select: (cols: string) => { eq: (col: string, val: string) => { maybeSingle: () => Promise<{ data: { school_id: string | null } | null }> } } } }, userId: string): Promise<string | null> {
   const { data } = await supabase.from("app_users").select("school_id").eq("id", userId).maybeSingle();
-  return (data?.school_id as string | null) ?? null;
+  return data?.school_id ?? null;
 }
 
 export const createStudent = createServerFn({ method: "POST" })
