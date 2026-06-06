@@ -860,6 +860,48 @@ export type Database = {
         }
         Relationships: []
       }
+      timetable_slots: {
+        Row: {
+          class_label: string
+          created_at: string
+          day: string
+          id: string
+          period: string
+          room: string | null
+          school_id: string
+          subject: string | null
+          teacher_user_id: string | null
+          unassigned_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_label: string
+          created_at?: string
+          day: string
+          id?: string
+          period: string
+          room?: string | null
+          school_id: string
+          subject?: string | null
+          teacher_user_id?: string | null
+          unassigned_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_label?: string
+          created_at?: string
+          day?: string
+          id?: string
+          period?: string
+          room?: string | null
+          school_id?: string
+          subject?: string | null
+          teacher_user_id?: string | null
+          unassigned_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       school_directory: {
