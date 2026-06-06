@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listGradesForClass, upsertGrade } from "@/lib/grades.functions";
 import { listStudents } from "@/lib/students.functions";
 import { getMyTeacherAssignments } from "@/lib/assignments.functions";
+import { useSchoolTaxonomy } from "@/lib/use-school-taxonomy";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Save, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
