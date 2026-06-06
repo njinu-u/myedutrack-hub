@@ -196,6 +196,24 @@ function StaffPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={confirmRemove !== null} onOpenChange={(o) => !removeMut.isPending && !o && setConfirmRemove(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-danger" /> Delete this account?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <b>{confirmRemove?.full_name ?? confirmRemove?.email}</b>? This action cannot be undone — the user's profile and sign-in will be permanently removed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button onClick={() => setConfirmRemove(null)} disabled={removeMut.isPending} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button onClick={() => confirmRemove && removeMut.mutate(confirmRemove.id)} disabled={removeMut.isPending}
+              className="px-4 py-2 rounded-full bg-danger text-white text-sm inline-flex items-center gap-2 disabled:opacity-60">
+              {removeMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Yes, delete account
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
