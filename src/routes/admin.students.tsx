@@ -335,7 +335,39 @@ function StudentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Universal Importer */}
+      {/* Invite parents dialog (per student) */}
+      <Dialog open={!!inviteFor} onOpenChange={(o) => { if (!o) { setInviteFor(null); setInviteEmails(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite parents of {inviteFor?.name}</DialogTitle>
+            <DialogDescription>Send invitations to one or more parents/guardians. Each will get their own link.</DialogDescription>
+          </DialogHeader>
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email(s)</span>
+            <textarea
+              value={inviteEmails}
+              onChange={(e) => setInviteEmails(e.target.value)}
+              rows={3}
+              className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm"
+              placeholder="mom@example.com, dad@example.com, guardian@example.com"
+            />
+            <span className="text-[11px] text-muted-foreground">Separate multiple emails with commas, spaces, or new lines.</span>
+          </label>
+          <DialogFooter>
+            <button onClick={() => { setInviteFor(null); setInviteEmails(""); }} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button
+              disabled={inviteMut.isPending || inviteEmails.trim().length < 3}
+              onClick={() => inviteMut.mutate()}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50"
+            >
+              {inviteMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <Mail className="h-3.5 w-3.5" />Send invitations
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <UniversalImporter
         open={importOpen}
         onOpenChange={setImportOpen}
