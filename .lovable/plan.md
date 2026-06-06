@@ -1,75 +1,83 @@
-# Plan: School-based auth + Gmail invites + de-placeholder all portals
+# Implementation Plan
 
-The full request is large (three independent feature tracks). To ship reliably, I'll do it in **three sequenced phases**. Each phase is shippable on its own.
-
----
-
-## Phase 1 — School-based invitation auth (the foundation)
-
-Everything else depends on this. Today the project already has an `invitations` flow with codes and a `/join/$code` page, but the spec asks for a parallel token-link flow (`/accept-invite?token=...`), Gmail-compose sending, and per-role admin invite forms inside the existing portal screens.
-
-**Database**
-- Add columns to `school_invitations`: `name text`, `status text default 'pending'`, `token uuid default gen_random_uuid() unique`. Keep the existing `code` for the current `/join/$code` path so we don't break anything.
-- Index on `token`.
-
-**Server functions** (in `src/lib/invitations.functions.ts`)
-- Extend `createInvitation` to accept `name`, optional `student_id` (for parents), and return `{ token, invite_url }`.
-- Add `lookupInvitationByToken({ token })` — public, returns role/name/school_name/email/expired/used.
-- Add `redeemInvitationByToken({ token, password })` — creates auth user + `app_users` row + marks `status='accepted'`. Email comes from the invitation row (not user-entered) so the link is single-purpose.
-- Add `resendInvitation({ id })` and `cancelInvitation({ id })` (admin only).
-
-**Routes**
-- New `src/routes/accept-invite.tsx` (token-based welcome → set password → redirect to correct portal).
-- Keep existing `src/routes/join.$code.tsx` as-is (back-compat).
-- Update `src/routes/login.tsx` to redirect to correct portal by role (already mostly there).
-
-**Admin UI** (no visual redesign — extend existing pages)
-- `admin.staff.tsx`: replace `ModulePage` with a real staff list + "Invite Teacher" / "Invite Counselor" buttons that open a modal with name/email/(subject) → calls `createInvitation` → opens Gmail compose in new tab → shows pending badge.
-- `admin.students.tsx`: existing "Add Student" modal gets optional `parent_email` and `student_email` fields → on submit also creates parent/student invitations and opens Gmail compose for each.
-- `admin.invitations.tsx`: extend existing page with Resend / Cancel actions, status badges, and the role-specific quick-invite forms.
-
-**Lock down self-signup**
-- `signup.tsx` stays as the admin-only signup (already is).
-- No public role-based signup exists, so nothing to remove.
+This is a large, cross-cutting set of changes. Below is the proposed scope, broken into five workstreams. Please review and approve (or trim) before I build.
 
 ---
 
-## Phase 2 — Gmail-compose sending (layered on Phase 1)
+## 1. Universal File Import + Column Mapping
 
-A small shared helper `src/lib/gmail-compose.ts` with:
-- `buildInviteEmail(role, { name, school_name, admin_name, student_name, invite_url })` → `{ subject, body }` using the exact templates from the spec.
-- `openGmailCompose({ to, subject, body })` → builds `https://mail.google.com/mail/?view=cm&fs=1&to=...&su=...&body=...` (fully URL-encoded) and `window.open(url, "_blank", "noopener")`.
-- `copyInviteLink(url)` → clipboard + toast.
+**Goal:** Replace the CSV-only importer with a generic importer used everywhere (students today; later: users, grades, timetables, etc.).
 
-Wired into every "Send Invitation" / "Resend invite" button. Admin's `full_name` and `school.name` are read from the existing auth context.
+- New shared component `src/components/universal-importer.tsx` with three steps:
+  1. **Upload** — accepts `.csv, .xlsx, .xls, .json, .txt, .tsv` (any structured file). Parses via:
+     - `papaparse` for CSV/TSV/TXT
+     - `xlsx` (SheetJS) for XLSX/XLS — new dep
+     - `JSON.parse` for JSON arrays
+  2. **Map columns** — list detected source columns, each with a dropdown to map to a known system field (e.g. for students: `full_name`, `grade`, `class_id`, `photo_url`). Unmapped columns are kept as custom fields.
+  3. **Preview & confirm** — render first 5 rows using the mapping; show count and "Confirm import".
+- Custom fields stored as JSONB. Requires a migration adding `custom_fields jsonb default '{}'::jsonb` to `students` (and we'll add the same to other targets as we wire them).
+- Replace the existing CSV dialog in `admin.students.tsx` with the new component. Wire `bulkCreateStudents` server fn to accept `custom_fields`.
 
----
-
-## Phase 3 — Replace ModulePage placeholders with real features
-
-14 placeholder pages remain. I'll convert them in priority order, using the existing Supabase schema where possible and adding tables only where strictly required. **I will not add tables/edge functions speculatively** — each conversion will reuse existing tables when the data already fits.
-
-**Reusing existing tables (no schema changes):**
-- `teacher.classes` → list of `students` grouped by `class_id`/`grade`.
-- `teacher.assessments` → `grades` filtered by entered_by/term.
-- `teacher.reports` → aggregate of `grades`/`attendance`/`observations` per student with CSV/PDF export.
-- `counselor.students` → list of `students` with mood/flag summaries.
-- `counselor.sessions` → use `appointments` rows where the counselor is `teacher_user_id` (or extend `appointments` with a `kind` column — small migration).
-- `counselor.interventions` → `counselor_flags` with status filter + resolve action.
-- `student.reports` → same aggregate as teacher.reports but scoped to the linked student.
-- `parent.resources` → static curated resource list from a new tiny `resources` table seeded with school-agnostic links.
-- `admin.attendance` → school-wide rollup of `attendance` with date range.
-- `admin.assessments` → school-wide rollup of `grades`.
-- `admin.communication` → school-wide message volume from `messages` + broadcast composer (insert one `messages` row per recipient).
-- `admin.curriculum` → small new `curriculum_units` table (school_id, subject, unit, term, notes).
-- `admin.settings` → school profile edit form (name, country) writing to `schools`.
-
-Each converted page gets: loading state, empty state with guidance, success/error toasts, and respects the existing visual design.
+**Note:** I'll ship the students flow end-to-end now, plus the reusable component. Other import surfaces (users/grades/timetables) get switched to the same component in a follow-up so this PR stays reviewable.
 
 ---
 
-## What I need from you
+## 2. Admin — Custom Grade / Class / Subject Taxonomy
 
-The plan is long enough that I want to **ship it in three turns**, in this order: Phase 1 → Phase 2 → Phase 3. After you approve, I'll start with Phase 1 (auth/invitations end-to-end) in this turn, then ping you to continue.
+**Goal:** Admin defines the vocabulary used across the whole school.
 
-If you'd rather I prioritise differently (e.g. start with Phase 3 placeholder cleanup instead), say so and I'll re-order.
+- New table `school_taxonomy` (one row per school):
+  - `grades text[]` — e.g. `['Grade 1','Grade 2',...]`
+  - `class_style text` — `alphabet | colors | numbers | custom`
+  - `class_sections jsonb` — per-grade section labels (auto-generated from style or custom-entered)
+  - `subjects text[]`
+- RLS: any school member can read; only `school_admin` can write.
+- New page `src/routes/admin.taxonomy.tsx` (linked from Settings) with three sections (grades / classes / subjects), each with add/edit/remove.
+- On first admin login: if `school_taxonomy` row is missing, redirect to `/admin/taxonomy` with an onboarding banner.
+- Shared hook `useSchoolTaxonomy()` returning `{ grades, classes, subjects }`. Teacher/counselor/student dropdowns and labels read from this instead of hardcoded values.
+
+---
+
+## 3. Teacher — "My Classes & Subjects"
+
+- New table `teacher_assignments (user_id, class_label, subject)` with unique constraint and RLS (teacher manages own rows; admin can read).
+- Setup step on `/teacher` if no rows exist → redirect to `/teacher/setup`.
+- Also editable from `/profile`.
+- Filter teacher dashboard / attendance / gradebook queries to the teacher's selected classes & subjects.
+
+## 4. Counselor — "My Assigned Classes"
+
+- Same pattern: `counselor_assignments (user_id, class_label)`.
+- Setup step on `/counselor` first visit; editable from profile.
+- Counselor's student roster and session log filtered to assigned classes.
+
+---
+
+## 5. Self-Service Account Deletion
+
+- Server fn `deleteOwnAccount` in `src/lib/account.functions.ts`:
+  - Uses `supabaseAdmin` (in handler) to delete the auth user after verifying `auth.uid()`.
+  - Cascades: deletes `app_users`, `teacher_assignments`, `counselor_assignments`, `mood_checkins` for that user, etc. (FK ON DELETE CASCADE where possible; explicit deletes otherwise).
+- "Delete account" section added to `src/routes/profile.tsx` for all roles, with confirmation modal.
+- Admin already has user management — extend `admin.staff.tsx` / users panel with the same delete action (admin-side server fn `deleteUserAsAdmin`, restricted to same school + `school_admin` role).
+- After self-deletion: sign out + redirect to `/`.
+
+---
+
+## Technical Summary
+
+**New deps:** `xlsx`
+**New tables:** `school_taxonomy`, `teacher_assignments`, `counselor_assignments`
+**Migrations:** add `custom_fields jsonb` to `students`; create the three new tables with grants + RLS; add `ON DELETE CASCADE` where missing for user-owned rows.
+**New files:** `universal-importer.tsx`, `admin.taxonomy.tsx`, `teacher.setup.tsx`, `counselor.setup.tsx`, `account.functions.ts`, `taxonomy.functions.ts`, `assignments.functions.ts`, `use-school-taxonomy.ts`
+**Edited:** `admin.students.tsx`, `admin.tsx` (nav), `teacher.tsx`, `counselor.tsx`, `profile.tsx`, `students.functions.ts`, `admin.staff.tsx`
+
+---
+
+## Questions before I build
+
+1. **Scope of "everywhere import exists":** Today only students has an import flow. Want me to also add importers for **staff/users** and **grades** in this PR, or just wire the reusable component and migrate students now (others later)?
+2. **Custom fields display:** Should imported custom fields be **visible in the student detail page** (extra section), or just stored quietly for export/reporting?
+3. **Account deletion hard vs soft:** Hard delete (row gone, unrecoverable) or soft delete (mark `deleted_at`, hide from UI, purge after 30 days)?
+
+Reply with answers (or "go ahead with defaults: students-only for now, custom fields shown on detail page, hard delete") and I'll implement.

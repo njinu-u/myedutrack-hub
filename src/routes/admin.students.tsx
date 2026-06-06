@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, X, Trash2 } from "lucide-react";
-import { useMemo, useRef, useState } from "react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
@@ -13,6 +13,7 @@ import { createInvitation } from "@/lib/invitations.functions";
 import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
 import Papa from "papaparse";
+import { UniversalImporter, type ImportedRow } from "@/components/universal-importer";
 
 export const Route = createFileRoute("/admin/students")({
   component: StudentsPage,
@@ -25,8 +26,6 @@ const STATUS_TONES: Record<string, string> = {
   "Critical": "bg-danger/15 text-danger",
   "New Transfer": "bg-teal/15 text-teal",
 };
-
-type CsvRow = { full_name: string | null; grade?: string | null; class_id?: string | null; photo_url?: string | null };
 
 function StudentsPage() {
   const auth = useAuth();
@@ -54,9 +53,6 @@ function StudentsPage() {
   const [gradeFilter, setGradeFilter] = useState<string>("all");
   const [addOpen, setAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
-  const [csvRows, setCsvRows] = useState<CsvRow[] | null>(null);
-  const [csvError, setCsvError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Add Student form state
   const [newName, setNewName] = useState("");
@@ -97,12 +93,9 @@ function StudentsPage() {
           invite_url: url,
           student_name: studentName,
         });
-        // Stagger so the browser opens both tabs reliably
         setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), kind === "parent" ? 200 : 1000);
       }
-      if (followups.length > 0) {
-        toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
-      }
+      if (followups.length > 0) toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
       setAddOpen(false);
       setNewName(""); setNewGrade(""); setNewClass(""); setParentEmail(""); setStudentEmail("");
       qc.invalidateQueries({ queryKey: ["admin-students"] });
@@ -112,10 +105,20 @@ function StudentsPage() {
   });
 
   const importMut = useMutation({
-    mutationFn: () => bulkAdd({ data: { rows: csvRows ?? [] } }),
+    mutationFn: (rows: ImportedRow[]) => bulkAdd({
+      data: {
+        rows: rows.map((r) => ({
+          full_name: r.mapped.full_name ?? null,
+          grade: r.mapped.grade ?? null,
+          class_id: r.mapped.class_id ?? null,
+          photo_url: r.mapped.photo_url ?? null,
+          custom_fields: r.custom_fields,
+        })),
+      },
+    }),
     onSuccess: (res) => {
       toast.success(`${res.inserted} students imported successfully`);
-      setImportOpen(false); setCsvRows(null); setCsvError(null);
+      setImportOpen(false);
       qc.invalidateQueries({ queryKey: ["admin-students"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -137,41 +140,6 @@ function StudentsPage() {
     const matchGrade = gradeFilter === "all" || s.grade === gradeFilter;
     return matchQ && matchGrade;
   });
-
-  const handlePickFile = () => fileRef.current?.click();
-
-  const handleFile = (file: File) => {
-    setCsvError(null); setCsvRows(null);
-    Papa.parse<Record<string, string>>(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const fields = (results.meta.fields ?? []).map((f) => f.trim().toLowerCase());
-        const nameKey = fields.find((f) => ["name", "full_name", "student", "student_name"].includes(f));
-        // name is optional — if column exists use it; if not, generate placeholder names
-        const rows: CsvRow[] = results.data
-          .map((raw): CsvRow | null => {
-            const norm: Record<string, string> = {};
-            Object.entries(raw).forEach(([k, v]) => { norm[k.trim().toLowerCase()] = (v ?? "").toString().trim(); });
-            // Allow empty name — admin can fill it later
-            const full_name = nameKey ? norm[nameKey] || null : null;
-            return {
-              full_name: full_name ?? null,
-              grade: norm["grade"] || null,
-              class_id: norm["class"] || norm["class_id"] || null,
-              photo_url: norm["photo_url"] || norm["photo"] || null,
-            };
-          })
-          .filter((r): r is CsvRow => r !== null);
-        if (rows.length === 0) {
-          setCsvError("No valid rows found in CSV");
-          return;
-        }
-        setCsvRows(rows);
-      },
-      error: (err) => setCsvError(err.message),
-    });
-  };
 
   const handleExport = () => {
     const csv = Papa.unparse(display.map((s) => ({
@@ -202,7 +170,7 @@ function StudentsPage() {
         actions={
           <>
             <button onClick={onImportClick} className="px-3 h-9 rounded-full bg-secondary text-sm inline-flex items-center gap-2">
-              <Upload className="h-3.5 w-3.5" />Import CSV
+              <Upload className="h-3.5 w-3.5" />Import file
             </button>
             <button onClick={onAddClick} className="px-3 h-9 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2">
               <Plus className="h-3.5 w-3.5" />Add student
@@ -236,7 +204,7 @@ function StudentsPage() {
           <div className="py-12 text-center text-sm text-muted-foreground">Loading students…</div>
         ) : filtered.length === 0 ? (
           <div className="py-12 text-center text-sm text-muted-foreground">
-            {isReal ? "No students yet. Use Import CSV or Add student to populate your school." : "No students match your filters."}
+            {isReal ? "No students yet. Use Import file or Add student to populate your school." : "No students match your filters."}
           </div>
         ) : (
           <div className="mt-5 overflow-x-auto">
@@ -305,50 +273,27 @@ function StudentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Import CSV dialog */}
-      <Dialog open={importOpen} onOpenChange={(o) => { setImportOpen(o); if (!o) { setCsvRows(null); setCsvError(null); } }}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Import students from CSV</DialogTitle>
-            <DialogDescription>Required column: <b>name</b>. Optional: grade, class, photo_url.</DialogDescription>
-          </DialogHeader>
-          <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
-          {!csvRows && !csvError && (
-            <button onClick={handlePickFile} className="w-full py-10 rounded-xl border-2 border-dashed text-sm hover:border-teal hover:bg-teal/5 transition">
-              <Upload className="h-5 w-5 mx-auto mb-2 text-muted-foreground" />
-              Choose a .csv file
-            </button>
-          )}
-          {csvError && (
-            <div className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-sm text-danger flex items-start gap-2">
-              <X className="h-4 w-4 shrink-0 mt-0.5" /> {csvError}
-            </div>
-          )}
-          {csvRows && (
-            <div>
-              <div className="text-xs text-muted-foreground mb-2">Preview · first 5 of {csvRows.length} rows</div>
-              <div className="overflow-x-auto rounded-lg border">
-                <table className="w-full text-xs">
-                  <thead className="bg-secondary"><tr><th className="text-left p-2">Name</th><th className="text-left p-2">Grade</th><th className="text-left p-2">Class</th></tr></thead>
-                  <tbody>{csvRows.slice(0, 5).map((r, i) => (
-                    <tr key={i} className="border-t"><td className="p-2">{r.full_name}</td><td className="p-2">{r.grade ?? "—"}</td><td className="p-2">{r.class_id ?? "—"}</td></tr>
-                  ))}</tbody>
-                </table>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <button onClick={() => setImportOpen(false)} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
-            {csvRows && (
-              <button disabled={importMut.isPending} onClick={() => importMut.mutate()}
-                className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50">
-                {importMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Confirm import ({csvRows.length})
-              </button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Universal Importer */}
+      <UniversalImporter
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        title="Import students"
+        description="Upload any file (CSV, Excel, JSON, TXT). Match its columns to system fields — anything unmatched is preserved as a custom field."
+        fields={[
+          { key: "full_name", label: "Full name", required: true },
+          { key: "grade", label: "Grade" },
+          { key: "class_id", label: "Class" },
+          { key: "photo_url", label: "Photo URL" },
+        ]}
+        suggestions={{
+          "name": "full_name", "full name": "full_name", "student": "full_name", "student_name": "full_name", "student name": "full_name",
+          "grade": "grade", "year": "grade", "form": "grade",
+          "class": "class_id", "class_id": "class_id", "section": "class_id",
+          "photo": "photo_url", "photo_url": "photo_url", "image": "photo_url",
+        }}
+        submitting={importMut.isPending}
+        onConfirm={async (rows) => { await importMut.mutateAsync(rows); }}
+      />
     </div>
   );
 }

@@ -203,6 +203,30 @@ export type Database = {
           },
         ]
       }
+      counselor_assignments: {
+        Row: {
+          class_label: string
+          created_at: string
+          id: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          class_label: string
+          created_at?: string
+          id?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          class_label?: string
+          created_at?: string
+          id?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       counselor_flags: {
         Row: {
           created_at: string
@@ -627,6 +651,36 @@ export type Database = {
           },
         ]
       }
+      school_taxonomy: {
+        Row: {
+          class_sections: Json
+          class_style: string
+          created_at: string
+          grades: string[]
+          school_id: string
+          subjects: string[]
+          updated_at: string
+        }
+        Insert: {
+          class_sections?: Json
+          class_style?: string
+          created_at?: string
+          grades?: string[]
+          school_id: string
+          subjects?: string[]
+          updated_at?: string
+        }
+        Update: {
+          class_sections?: Json
+          class_style?: string
+          created_at?: string
+          grades?: string[]
+          school_id?: string
+          subjects?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       schools: {
         Row: {
           activated_at: string | null
@@ -736,6 +790,7 @@ export type Database = {
         Row: {
           class_id: string | null
           created_at: string
+          custom_fields: Json
           full_name: string
           grade: string | null
           id: string
@@ -745,6 +800,7 @@ export type Database = {
         Insert: {
           class_id?: string | null
           created_at?: string
+          custom_fields?: Json
           full_name: string
           grade?: string | null
           id?: string
@@ -754,6 +810,7 @@ export type Database = {
         Update: {
           class_id?: string | null
           created_at?: string
+          custom_fields?: Json
           full_name?: string
           grade?: string | null
           id?: string
@@ -769,6 +826,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      teacher_assignments: {
+        Row: {
+          class_label: string
+          created_at: string
+          id: string
+          school_id: string
+          subject: string | null
+          user_id: string
+        }
+        Insert: {
+          class_label: string
+          created_at?: string
+          id?: string
+          school_id: string
+          subject?: string | null
+          user_id: string
+        }
+        Update: {
+          class_label?: string
+          created_at?: string
+          id?: string
+          school_id?: string
+          subject?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

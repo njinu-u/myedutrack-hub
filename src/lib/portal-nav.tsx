@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, GraduationCap, BarChart3, ClipboardList, CalendarCheck, CalendarRange, BookOpen, MessageSquare, UserCog, FileText, Settings, BookMarked, Heart, Brain, ShieldAlert, FolderHeart, MessageCircle, Calendar, Sparkles, Smile, Target, TrendingUp, GraduationCap as Cap, Ticket } from "lucide-react";
+import { LayoutDashboard, Users, GraduationCap, BarChart3, ClipboardList, CalendarCheck, CalendarRange, BookOpen, MessageSquare, UserCog, FileText, Settings, BookMarked, Heart, Brain, ShieldAlert, FolderHeart, MessageCircle, Calendar, Sparkles, Smile, Target, TrendingUp, GraduationCap as Cap, Ticket, Tags, ListChecks } from "lucide-react";
 import type { NavItem } from "@/components/portal-layout";
 
 export const ADMIN_NAV: NavItem[] = [
@@ -14,11 +14,13 @@ export const ADMIN_NAV: NavItem[] = [
   { to: "/admin/staff", label: "Staff", icon: <UserCog className="h-4 w-4" /> },
   { to: "/admin/invitations", label: "Invitations", icon: <Ticket className="h-4 w-4" /> },
   { to: "/admin/reports", label: "Reports", icon: <FileText className="h-4 w-4" /> },
+  { to: "/admin/taxonomy", label: "School Vocabulary", icon: <Tags className="h-4 w-4" /> },
   { to: "/admin/settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
 ];
 
 export const TEACHER_NAV: NavItem[] = [
   { to: "/teacher", label: "My Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+  { to: "/teacher/setup", label: "My Classes & Subjects", icon: <ListChecks className="h-4 w-4" /> },
   { to: "/teacher/classes", label: "My Classes", icon: <Users className="h-4 w-4" /> },
   { to: "/teacher/grades", label: "Grade Entry", icon: <GraduationCap className="h-4 w-4" /> },
   { to: "/teacher/observations", label: "Observations", icon: <BookMarked className="h-4 w-4" /> },
@@ -31,6 +33,7 @@ export const TEACHER_NAV: NavItem[] = [
 
 export const COUNSELOR_NAV: NavItem[] = [
   { to: "/counselor", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+  { to: "/counselor/setup", label: "My Assigned Classes", icon: <ListChecks className="h-4 w-4" /> },
   { to: "/counselor/students", label: "My Students", icon: <Users className="h-4 w-4" /> },
   { to: "/counselor/wellbeing", label: "Wellbeing Monitor", icon: <Heart className="h-4 w-4" /> },
   { to: "/counselor/interventions", label: "Intervention Tracker", icon: <ShieldAlert className="h-4 w-4" /> },

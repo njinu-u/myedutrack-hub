@@ -2,8 +2,11 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { deleteOwnAccount } from "@/lib/account.functions";
 import { toast } from "sonner";
-import { Camera, Loader2, ArrowLeft } from "lucide-react";
+import { Camera, Loader2, ArrowLeft, Trash2, AlertTriangle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — EduTrack" }] }),
@@ -18,6 +21,22 @@ function ProfilePage() {
   const [phone, setPhone] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const deleteFn = useServerFn(deleteOwnAccount);
+
+  const onDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await deleteFn();
+      await supabase.auth.signOut();
+      toast.success("Account deleted");
+      navigate({ to: "/" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Deletion failed");
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!auth.loading && !auth.isAuthed) {
@@ -182,6 +201,36 @@ function ProfilePage() {
             </button>
           </div>
         </div>
+
+        <div className="mt-6 rounded-2xl bg-card border border-danger/30 shadow-soft p-6">
+          <h2 className="font-display text-lg text-danger flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Danger zone</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Deleting your account is permanent. Your profile, sign-in credentials, and personal data will be removed and cannot be recovered.
+          </p>
+          <button
+            onClick={() => setConfirmDelete(true)}
+            className="mt-4 h-10 px-5 rounded-lg bg-danger text-white font-medium hover:opacity-90 inline-flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" /> Delete my account
+          </button>
+        </div>
+
+        <Dialog open={confirmDelete} onOpenChange={(o) => !deleting && setConfirmDelete(o)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-danger" /> Delete your account?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete your account? This action cannot be undone. All your personal data will be permanently removed.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <button onClick={() => setConfirmDelete(false)} disabled={deleting} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+              <button onClick={onDeleteAccount} disabled={deleting} className="px-4 py-2 rounded-full bg-danger text-white text-sm inline-flex items-center gap-2 disabled:opacity-60">
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} Yes, delete my account
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
