@@ -154,6 +154,8 @@ function StudentsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const [importSummary, setImportSummary] = useState<{ added: number; updated: number; failed: { row: number; reason: string }[] } | null>(null);
+
   const importMut = useMutation({
     mutationFn: (rows: ImportedRow[]) => bulkAdd({
       data: {
@@ -162,13 +164,20 @@ function StudentsPage() {
           grade: r.mapped.grade ?? null,
           class_id: r.mapped.class_id ?? null,
           photo_url: r.mapped.photo_url ?? null,
+          email: r.mapped.email ?? null,
+          external_id: r.mapped.external_id ?? null,
           custom_fields: r.custom_fields,
         })),
       },
     }),
     onSuccess: (res) => {
-      toast.success(`${res.inserted} students imported successfully`);
+      setImportSummary(res);
       setImportOpen(false);
+      if (res.added + res.updated > 0) {
+        toast.success(`Import complete: ${res.added} added, ${res.updated} updated${res.failed.length ? `, ${res.failed.length} failed` : ""}`);
+      } else if (res.failed.length > 0) {
+        toast.error(`Import failed: ${res.failed.length} row${res.failed.length>1?"s":""} could not be saved`);
+      }
       qc.invalidateQueries({ queryKey: ["admin-students"] });
     },
     onError: (e: Error) => toast.error(e.message),
