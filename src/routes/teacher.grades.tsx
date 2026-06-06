@@ -114,7 +114,7 @@ function RealGrades() {
   return (
     <div className="space-y-6">
       <PageHead
-        title={`Grade entry · ${subject} · ${term}`}
+        title={`Grade entry${subject ? ` · ${subject}` : ""} · ${term}`}
         subtitle="Edit a score, then Save. Updates appear live across the school."
         actions={
           <div className="flex gap-2 flex-wrap">
@@ -123,7 +123,8 @@ function RealGrades() {
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
+              {mySubjects.length === 0 && <option value="">No subjects assigned</option>}
+              {mySubjects.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
               {TERMS.map((t) => <option key={t}>{t}</option>)}
@@ -132,12 +133,17 @@ function RealGrades() {
         }
       />
       <Card>
-        {(sQ.isLoading || gQ.isLoading) ? (
+        {(sQ.isLoading || aQ.isLoading || gQ.isLoading) ? (
           <div className="py-10 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-teal" /></div>
+        ) : mySubjects.length === 0 ? (
+          <div className="py-12 text-center">
+            <BookOpen className="h-6 w-6 mx-auto text-teal" />
+            <p className="text-sm text-muted-foreground mt-3">You have no subjects assigned yet. Set them up in <Link to="/teacher/setup" className="font-medium underline">Teacher → Setup</Link>.</p>
+          </div>
         ) : classes.length === 0 ? (
           <div className="py-12 text-center">
             <BookOpen className="h-6 w-6 mx-auto text-teal" />
-            <p className="text-sm text-muted-foreground mt-3">No students yet. Add them from <span className="font-medium">Admin → Students</span>.</p>
+            <p className="text-sm text-muted-foreground mt-3">No students yet in your assigned classes.</p>
           </div>
         ) : rows.length === 0 ? (
           <div className="py-12 text-center text-sm text-muted-foreground">No students in this class.</div>
