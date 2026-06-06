@@ -381,15 +381,19 @@ function StudentsPage() {
         open={importOpen}
         onOpenChange={setImportOpen}
         title="Import students"
-        description="Upload any file (CSV, Excel, JSON, TXT). Match its columns to system fields — anything unmatched is preserved as a custom field."
+        description="Upload any file (CSV, Excel, JSON, TXT). Match its columns to system fields — anything unmatched is preserved as a custom field. Existing students (matched by email or student ID) are updated instead of duplicated."
         fields={[
           { key: "full_name", label: "Full name", required: true },
+          { key: "email", label: "Email" },
+          { key: "external_id", label: "Student ID" },
           { key: "grade", label: "Grade" },
           { key: "class_id", label: "Class" },
           { key: "photo_url", label: "Photo URL" },
         ]}
         suggestions={{
           "name": "full_name", "full name": "full_name", "student": "full_name", "student_name": "full_name", "student name": "full_name",
+          "email": "email", "email address": "email", "e-mail": "email",
+          "id": "external_id", "student_id": "external_id", "student id": "external_id", "external_id": "external_id", "admission_no": "external_id", "admission no": "external_id",
           "grade": "grade", "year": "grade", "form": "grade",
           "class": "class_id", "class_id": "class_id", "section": "class_id",
           "photo": "photo_url", "photo_url": "photo_url", "image": "photo_url",
@@ -397,6 +401,51 @@ function StudentsPage() {
         submitting={importMut.isPending}
         onConfirm={async (rows) => { await importMut.mutateAsync(rows); }}
       />
+
+      {/* Post-import summary */}
+      <Dialog open={!!importSummary} onOpenChange={(o) => { if (!o) setImportSummary(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import summary</DialogTitle>
+            <DialogDescription>Results from your latest student file import.</DialogDescription>
+          </DialogHeader>
+          {importSummary && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-xl bg-success/10 text-success p-3 text-center">
+                  <div className="text-2xl font-display">{importSummary.added}</div>
+                  <div className="text-xs uppercase tracking-wider">Added</div>
+                </div>
+                <div className="rounded-xl bg-teal/10 text-teal p-3 text-center">
+                  <div className="text-2xl font-display">{importSummary.updated}</div>
+                  <div className="text-xs uppercase tracking-wider">Updated</div>
+                </div>
+                <div className="rounded-xl bg-danger/10 text-danger p-3 text-center">
+                  <div className="text-2xl font-display">{importSummary.failed.length}</div>
+                  <div className="text-xs uppercase tracking-wider">Failed</div>
+                </div>
+              </div>
+              {importSummary.failed.length > 0 && (
+                <div className="rounded-lg border max-h-60 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-secondary sticky top-0">
+                      <tr><th className="text-left p-2">Row</th><th className="text-left p-2">Reason</th></tr>
+                    </thead>
+                    <tbody>
+                      {importSummary.failed.map((f) => (
+                        <tr key={f.row} className="border-t"><td className="p-2 font-mono">{f.row}</td><td className="p-2 text-muted-foreground">{f.reason}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <button onClick={() => setImportSummary(null)} className="px-4 py-2 rounded-full bg-navy text-white text-sm">Done</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
