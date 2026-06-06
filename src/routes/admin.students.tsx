@@ -292,7 +292,7 @@ function StudentsPage() {
           "photo": "photo_url", "photo_url": "photo_url", "image": "photo_url",
         }}
         submitting={importMut.isPending}
-        onConfirm={(rows) => importMut.mutateAsync(rows)}
+        onConfirm={async (rows) => { await importMut.mutateAsync(rows); }}
       />
     </div>
   );
