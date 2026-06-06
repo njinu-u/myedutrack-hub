@@ -37,6 +37,7 @@ function RealGrades() {
   const fetchList = useServerFn(listStudents);
   const fetchGrades = useServerFn(listGradesForClass);
   const fetchAssignments = useServerFn(getMyTeacherAssignments);
+  const fetchTaxonomy = useServerFn(getTaxonomy);
   const save = useServerFn(upsertGrade);
 
   const [subject, setSubject] = useState<string>("");
