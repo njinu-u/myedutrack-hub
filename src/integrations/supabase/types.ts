@@ -791,6 +791,8 @@ export type Database = {
           class_id: string | null
           created_at: string
           custom_fields: Json
+          email: string | null
+          external_id: string | null
           full_name: string
           grade: string | null
           id: string
@@ -801,6 +803,8 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           custom_fields?: Json
+          email?: string | null
+          external_id?: string | null
           full_name: string
           grade?: string | null
           id?: string
@@ -811,6 +815,8 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           custom_fields?: Json
+          email?: string | null
+          external_id?: string | null
           full_name?: string
           grade?: string | null
           id?: string
