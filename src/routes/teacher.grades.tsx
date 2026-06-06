@@ -12,7 +12,6 @@ import { Loader2, Save, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
