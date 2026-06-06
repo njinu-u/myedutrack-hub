@@ -133,12 +133,12 @@ function RealGrades() {
         }
       />
       <Card>
-        {(sQ.isLoading || aQ.isLoading || gQ.isLoading) ? (
+        {(sQ.isLoading || aQ.isLoading || gQ.isLoading || taxLoading) ? (
           <div className="py-10 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-teal" /></div>
         ) : mySubjects.length === 0 ? (
           <div className="py-12 text-center">
             <BookOpen className="h-6 w-6 mx-auto text-teal" />
-            <p className="text-sm text-muted-foreground mt-3">You have no subjects assigned yet. Set them up in <Link to="/teacher/setup" className="font-medium underline">Teacher → Setup</Link>.</p>
+            <p className="text-sm text-muted-foreground mt-3">No subjects configured — please contact your administrator.</p>
           </div>
         ) : classes.length === 0 ? (
           <div className="py-12 text-center">
