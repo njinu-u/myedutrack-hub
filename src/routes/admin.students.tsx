@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2 } from "lucide-react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2, Mail } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -60,17 +60,67 @@ function StudentsPage() {
   const [newClass, setNewClass] = useState("");
   const [parentEmail, setParentEmail] = useState("");
   const [studentEmail, setStudentEmail] = useState("");
+  const [inviteFor, setInviteFor] = useState<{ id: string; name: string } | null>(null);
+  const [inviteEmails, setInviteEmails] = useState("");
+
+  const inviteMut = useMutation({
+    mutationFn: async () => {
+      if (!inviteFor) return { sent: [] as Awaited<ReturnType<typeof invite>>[] };
+      const emails = inviteEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      if (emails.length === 0) throw new Error("Add at least one email");
+      const results: Awaited<ReturnType<typeof invite>>[] = [];
+      for (const em of emails) {
+        try {
+          const res = await invite({
+            data: { role: "parent", name: `Parent of ${inviteFor.name}`, email: em, linked_student_id: inviteFor.id },
+          });
+          results.push(res);
+        } catch (err) {
+          console.error("invite failed", em, err);
+          toast.error(`Could not invite ${em}`);
+        }
+      }
+      return { sent: results };
+    },
+    onSuccess: ({ sent }) => {
+      if (sent.length === 0) return;
+      sent.forEach((payload, idx) => {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: "parent",
+          recipient_name: "there",
+          recipient_email: payload.invitation.email!,
+          school_name: payload.school_name,
+          admin_name: payload.admin_name,
+          invite_url: url,
+          student_name: inviteFor?.name,
+        });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      toast.success(`${sent.length} parent invitation${sent.length>1?"s":""} saved. Sending emails open in Gmail.`);
+      setInviteFor(null);
+      setInviteEmails("");
+      qc.invalidateQueries({ queryKey: ["invitations"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const addMut = useMutation({
     mutationFn: async () => {
       const created = await addStudent({ data: { full_name: newName.trim(), grade: newGrade || null, class_id: newClass || null } });
       const studentId = created.id;
       const followups: Array<{ kind: "parent" | "student"; payload: Awaited<ReturnType<typeof invite>> }> = [];
-      if (parentEmail.trim()) {
-        const res = await invite({
-          data: { role: "parent", name: `Parent of ${newName.trim()}`, email: parentEmail.trim(), linked_student_id: studentId },
-        });
-        followups.push({ kind: "parent", payload: res });
+      const parentEmails = parentEmail.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      for (const pe of parentEmails) {
+        try {
+          const res = await invite({
+            data: { role: "parent", name: `Parent of ${newName.trim()}`, email: pe, linked_student_id: studentId },
+          });
+          followups.push({ kind: "parent", payload: res });
+        } catch (err) {
+          console.error("parent invite failed", pe, err);
+          toast.error(`Could not invite ${pe}`);
+        }
       }
       if (studentEmail.trim()) {
         const res = await invite({
@@ -82,7 +132,7 @@ function StudentsPage() {
     },
     onSuccess: ({ followups, studentName }) => {
       toast.success("Student added");
-      for (const { kind, payload } of followups) {
+      followups.forEach(({ kind, payload }, idx) => {
         const url = buildInviteUrl(payload.invitation.token);
         const { subject, body } = buildInviteEmail({
           role: kind,
@@ -93,9 +143,9 @@ function StudentsPage() {
           invite_url: url,
           student_name: studentName,
         });
-        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), kind === "parent" ? 200 : 1000);
-      }
-      if (followups.length > 0) toast("Invitations saved. Please send the emails that just opened in Gmail.", { duration: 6000 });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      if (followups.length > 0) toast(`${followups.length} invitation${followups.length>1?"s":""} saved. Please send the emails opening in Gmail.`, { duration: 6000 });
       setAddOpen(false);
       setNewName(""); setNewGrade(""); setNewClass(""); setParentEmail(""); setStudentEmail("");
       qc.invalidateQueries({ queryKey: ["admin-students"] });
@@ -223,14 +273,24 @@ function StudentsPage() {
                     <td><span className={cn("text-[10px] uppercase tracking-wider px-2 py-1 rounded-full", STATUS_TONES[s.status] ?? "bg-secondary")}>{s.status}</span></td>
                     <td className="text-right">
                       {isReal ? (
-                        <button
-                          onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
-                          disabled={deleteMut.isPending}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
-                          aria-label={`Delete ${s.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => setInviteFor({ id: String(s.id), name: s.name })}
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-teal/10 text-muted-foreground hover:text-teal transition"
+                            aria-label={`Invite parents of ${s.name}`}
+                            title="Invite parents"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
+                            disabled={deleteMut.isPending}
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
+                            aria-label={`Delete ${s.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       ) : null}
                     </td>
                   </tr>
@@ -257,8 +317,10 @@ function StudentsPage() {
               <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Class</span>
                 <input value={newClass} onChange={(e) => setNewClass(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7B" /></label>
             </div>
-            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email (optional)</span>
-              <input type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="parent@example.com" /></label>
+            <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email(s) (optional)</span>
+              <textarea value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} rows={2} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="mom@example.com, dad@example.com" />
+              <span className="text-[11px] text-muted-foreground">Separate multiple emails with commas, spaces, or new lines. Each parent gets their own invite.</span>
+            </label>
             <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Student email (optional)</span>
               <input type="email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="student@example.com" /></label>
             <p className="text-xs text-muted-foreground">If provided, invitations save and open in a Gmail tab for you to send.</p>
@@ -273,7 +335,39 @@ function StudentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Universal Importer */}
+      {/* Invite parents dialog (per student) */}
+      <Dialog open={!!inviteFor} onOpenChange={(o) => { if (!o) { setInviteFor(null); setInviteEmails(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite parents of {inviteFor?.name}</DialogTitle>
+            <DialogDescription>Send invitations to one or more parents/guardians. Each will get their own link.</DialogDescription>
+          </DialogHeader>
+          <label className="block">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">Parent email(s)</span>
+            <textarea
+              value={inviteEmails}
+              onChange={(e) => setInviteEmails(e.target.value)}
+              rows={3}
+              className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm"
+              placeholder="mom@example.com, dad@example.com, guardian@example.com"
+            />
+            <span className="text-[11px] text-muted-foreground">Separate multiple emails with commas, spaces, or new lines.</span>
+          </label>
+          <DialogFooter>
+            <button onClick={() => { setInviteFor(null); setInviteEmails(""); }} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button
+              disabled={inviteMut.isPending || inviteEmails.trim().length < 3}
+              onClick={() => inviteMut.mutate()}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50"
+            >
+              {inviteMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <Mail className="h-3.5 w-3.5" />Send invitations
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
       <UniversalImporter
         open={importOpen}
         onOpenChange={setImportOpen}
