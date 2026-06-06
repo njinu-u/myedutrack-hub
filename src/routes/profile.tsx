@@ -21,6 +21,22 @@ function ProfilePage() {
   const [phone, setPhone] = useState("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const deleteFn = useServerFn(deleteOwnAccount);
+
+  const onDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await deleteFn();
+      await supabase.auth.signOut();
+      toast.success("Account deleted");
+      navigate({ to: "/" });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Deletion failed");
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (!auth.loading && !auth.isAuthed) {
