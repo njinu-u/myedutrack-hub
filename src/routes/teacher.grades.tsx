@@ -122,7 +122,7 @@ function RealGrades() {
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {mySubjects.length === 0 && <option value="">No subjects assigned</option>}
+              {mySubjects.length === 0 && <option value="">No subjects configured</option>}
               {mySubjects.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
