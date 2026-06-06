@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listGradesForClass, upsertGrade } from "@/lib/grades.functions";
 import { listStudents } from "@/lib/students.functions";
 import { getMyTeacherAssignments } from "@/lib/assignments.functions";
+import { getTaxonomy } from "@/lib/taxonomy.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Save, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ function RealGrades() {
   const fetchList = useServerFn(listStudents);
   const fetchGrades = useServerFn(listGradesForClass);
   const fetchAssignments = useServerFn(getMyTeacherAssignments);
+  const fetchTaxonomy = useServerFn(getTaxonomy);
   const save = useServerFn(upsertGrade);
 
   const [subject, setSubject] = useState<string>("");
@@ -46,13 +48,10 @@ function RealGrades() {
 
   const sQ = useQuery({ queryKey: ["all-students"], queryFn: () => fetchList() });
   const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+  const tQ = useQuery({ queryKey: ["school-taxonomy"], queryFn: () => fetchTaxonomy() });
 
-  // subjects the teacher teaches (deduped, non-empty)
-  const mySubjects = useMemo(() => {
-    const s = new Set<string>();
-    for (const a of aQ.data?.items ?? []) if (a.subject) s.add(a.subject);
-    return [...s];
-  }, [aQ.data]);
+  // all subjects configured by the school admin
+  const schoolSubjects = useMemo(() => tQ.data?.taxonomy?.subjects ?? [], [tQ.data]);
 
   // class labels the teacher is assigned to
   const myClassLabels = useMemo(() => {
@@ -78,7 +77,7 @@ function RealGrades() {
   }, [sQ.data, myClassLabels]);
 
   useEffect(() => { if (!classKey && classes.length) setClassKey(classes[0].key); }, [classes, classKey]);
-  useEffect(() => { if (!subject && mySubjects.length) setSubject(mySubjects[0]); }, [mySubjects, subject]);
+  useEffect(() => { if (!subject && schoolSubjects.length) setSubject(schoolSubjects[0]); }, [schoolSubjects, subject]);
 
   const class_id = classKey.startsWith("class:") ? classKey.slice(6) : null;
   const grade = classKey.startsWith("grade:") ? classKey.slice(6) : null;
@@ -123,8 +122,8 @@ function RealGrades() {
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {mySubjects.length === 0 && <option value="">No subjects assigned</option>}
-              {mySubjects.map((s) => <option key={s} value={s}>{s}</option>)}
+              {schoolSubjects.length === 0 && <option value="">No subjects configured</option>}
+              {schoolSubjects.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
               {TERMS.map((t) => <option key={t}>{t}</option>)}
@@ -133,12 +132,12 @@ function RealGrades() {
         }
       />
       <Card>
-        {(sQ.isLoading || aQ.isLoading || gQ.isLoading) ? (
+        {(sQ.isLoading || aQ.isLoading || tQ.isLoading || gQ.isLoading) ? (
           <div className="py-10 text-center"><Loader2 className="h-5 w-5 animate-spin mx-auto text-teal" /></div>
-        ) : mySubjects.length === 0 ? (
+        ) : schoolSubjects.length === 0 ? (
           <div className="py-12 text-center">
             <BookOpen className="h-6 w-6 mx-auto text-teal" />
-            <p className="text-sm text-muted-foreground mt-3">You have no subjects assigned yet. Set them up in <Link to="/teacher/setup" className="font-medium underline">Teacher → Setup</Link>.</p>
+            <p className="text-sm text-muted-foreground mt-3">No subjects have been configured yet. Ask your admin to set them up in <Link to="/admin/taxonomy" className="font-medium underline">Admin → School Vocabulary</Link>.</p>
           </div>
         ) : classes.length === 0 ? (
           <div className="py-12 text-center">
