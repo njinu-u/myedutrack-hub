@@ -48,7 +48,23 @@ export type BulkImportSummary = {
   added: number;
   updated: number;
   failed: { row: number; reason: string }[];
+  parents: { student_id: string; student_name: string; emails: string[] }[];
 };
+
+function extractParentEmails(custom: Record<string, unknown> | undefined): string[] {
+  if (!custom) return [];
+  const out = new Set<string>();
+  for (const [k, v] of Object.entries(custom)) {
+    const key = k.trim().toLowerCase();
+    if (!/parent|guardian|mother|father|\bmom\b|\bdad\b/.test(key)) continue;
+    const raw = v == null ? "" : String(v);
+    for (const piece of raw.split(/[\s,;]+/)) {
+      const e = piece.trim();
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) out.add(e.toLowerCase());
+    }
+  }
+  return Array.from(out);
+}
 
 export const bulkCreateStudents = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -58,9 +74,8 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
     const schoolId = await getMySchoolId(supabase as never, userId);
     if (!schoolId) throw new Error("No school found for current user");
 
-    const summary: BulkImportSummary = { added: 0, updated: 0, failed: [] };
+    const summary: BulkImportSummary = { added: 0, updated: 0, failed: [], parents: [] };
 
-    // Pre-fetch existing students in this school for dedupe by email or external_id
     const { data: existing } = await supabase
       .from("students")
       .select("id,email,external_id")
@@ -101,6 +116,7 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
         school_id: schoolId,
       };
 
+      let savedId: string | null = null;
       if (existingId) {
         const { error } = await supabase.from("students").update(payload).eq("id", existingId).eq("school_id", schoolId);
         if (error) {
@@ -108,6 +124,7 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
           summary.failed.push({ row: i + 1, reason: "Could not update existing record" });
         } else {
           summary.updated += 1;
+          savedId = existingId;
         }
       } else {
         const { data: ins, error } = await supabase.from("students").insert(payload).select("id,email,external_id").single();
@@ -116,8 +133,16 @@ export const bulkCreateStudents = createServerFn({ method: "POST" })
           summary.failed.push({ row: i + 1, reason: "Could not save row" });
         } else {
           summary.added += 1;
+          savedId = ins.id as string;
           if (ins.email) byEmail.set((ins.email as string).toLowerCase(), ins.id as string);
           if (ins.external_id) byExt.set(ins.external_id as string, ins.id as string);
+        }
+      }
+
+      if (savedId) {
+        const emails = extractParentEmails(r.custom_fields as Record<string, unknown> | undefined);
+        if (emails.length > 0) {
+          summary.parents.push({ student_id: savedId, student_name: fullName, emails });
         }
       }
     }
