@@ -229,14 +229,24 @@ function StudentsPage() {
                     <td><span className={cn("text-[10px] uppercase tracking-wider px-2 py-1 rounded-full", STATUS_TONES[s.status] ?? "bg-secondary")}>{s.status}</span></td>
                     <td className="text-right">
                       {isReal ? (
-                        <button
-                          onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
-                          disabled={deleteMut.isPending}
-                          className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
-                          aria-label={`Delete ${s.name}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => setInviteFor({ id: String(s.id), name: s.name })}
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-teal/10 text-muted-foreground hover:text-teal transition"
+                            aria-label={`Invite parents of ${s.name}`}
+                            title="Invite parents"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => { if (confirm(`Delete ${s.name}? This cannot be undone.`)) deleteMut.mutate(String(s.id)); }}
+                            disabled={deleteMut.isPending}
+                            className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-danger/10 text-muted-foreground hover:text-danger transition disabled:opacity-50"
+                            aria-label={`Delete ${s.name}`}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       ) : null}
                     </td>
                   </tr>
