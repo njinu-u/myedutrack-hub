@@ -459,6 +459,34 @@ function StudentsPage() {
                   <div className="text-xs uppercase tracking-wider">Failed</div>
                 </div>
               </div>
+              {importSummary.parents.length > 0 && (
+                <div className="rounded-lg border p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-medium">Parent emails detected</div>
+                      <div className="text-xs text-muted-foreground">
+                        {importSummary.parents.reduce((n, p) => n + p.emails.length, 0)} email{importSummary.parents.reduce((n, p) => n + p.emails.length, 0)>1?"s":""} across {importSummary.parents.length} student{importSummary.parents.length>1?"s":""}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => bulkInviteMut.mutate(importSummary.parents)}
+                      disabled={bulkInviteMut.isPending}
+                      className="px-3 py-2 rounded-full bg-navy text-white text-xs inline-flex items-center gap-1 disabled:opacity-50"
+                    >
+                      {bulkInviteMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Mail className="h-3.5 w-3.5" />}
+                      Send all invitations
+                    </button>
+                  </div>
+                  <div className="max-h-44 overflow-y-auto text-xs space-y-1">
+                    {importSummary.parents.map((p) => (
+                      <div key={p.student_id} className="flex items-start justify-between gap-2 border-t pt-1">
+                        <span className="font-medium truncate">{p.student_name}</span>
+                        <span className="text-muted-foreground text-right">{p.emails.join(", ")}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {importSummary.failed.length > 0 && (
                 <div className="rounded-lg border max-h-60 overflow-y-auto">
                   <table className="w-full text-xs">
