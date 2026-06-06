@@ -77,7 +77,7 @@ function RealGrades() {
   }, [sQ.data, myClassLabels]);
 
   useEffect(() => { if (!classKey && classes.length) setClassKey(classes[0].key); }, [classes, classKey]);
-  useEffect(() => { if (!subject && mySubjects.length) setSubject(mySubjects[0]); }, [mySubjects, subject]);
+  useEffect(() => { if (!subject && schoolSubjects.length) setSubject(schoolSubjects[0]); }, [schoolSubjects, subject]);
 
   const class_id = classKey.startsWith("class:") ? classKey.slice(6) : null;
   const grade = classKey.startsWith("grade:") ? classKey.slice(6) : null;
@@ -122,8 +122,8 @@ function RealGrades() {
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {mySubjects.length === 0 && <option value="">No subjects assigned</option>}
-              {mySubjects.map((s) => <option key={s} value={s}>{s}</option>)}
+              {schoolSubjects.length === 0 && <option value="">No subjects configured</option>}
+              {schoolSubjects.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
               {TERMS.map((t) => <option key={t}>{t}</option>)}
