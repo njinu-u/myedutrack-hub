@@ -50,6 +50,7 @@ function RealGrades() {
   const save = useServerFn(upsertGrade);
 
   const [subject, setSubject] = useState<string>("");
+  const [subjectOpen, setSubjectOpen] = useState(false);
   const [term, setTerm] = useState(TERMS[1]);
   const [classKey, setClassKey] = useState<string>("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
