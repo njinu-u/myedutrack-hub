@@ -8,11 +8,20 @@ import { listStudents } from "@/lib/students.functions";
 import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { getTaxonomy } from "@/lib/taxonomy.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
-import { Loader2, Save, BookOpen } from "lucide-react";
+import { Loader2, Save, BookOpen, Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
@@ -41,6 +50,7 @@ function RealGrades() {
   const save = useServerFn(upsertGrade);
 
   const [subject, setSubject] = useState<string>("");
+  const [subjectOpen, setSubjectOpen] = useState(false);
   const [term, setTerm] = useState(TERMS[1]);
   const [classKey, setClassKey] = useState<string>("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
@@ -121,10 +131,47 @@ function RealGrades() {
               {classes.length === 0 && <option value="">No classes</option>}
               {classes.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
-            <select value={subject} onChange={(e) => setSubject(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
-              {schoolSubjects.length === 0 && <option value="">No subjects configured</option>}
-              {schoolSubjects.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <Popover open={subjectOpen} onOpenChange={setSubjectOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  className="px-3 h-9 rounded-full border bg-card text-sm inline-flex items-center justify-between gap-2 min-w-[10rem]"
+                  aria-expanded={subjectOpen}
+                >
+                  <span className={cn(!subject && "text-muted-foreground")}>
+                    {subject || "Select subject"}
+                  </span>
+                  <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0">
+                <Command>
+                  <CommandInput placeholder="Search subject…" />
+                  <CommandList>
+                    <CommandEmpty>No subject found.</CommandEmpty>
+                    <CommandGroup>
+                      {schoolSubjects.map((s) => (
+                        <CommandItem
+                          key={s}
+                          value={s}
+                          onSelect={(currentValue) => {
+                            setSubject(currentValue);
+                            setSubjectOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              subject === s ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {s}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <select value={term} onChange={(e) => setTerm(e.target.value)} className="px-3 h-9 rounded-full border bg-card text-sm">
               {TERMS.map((t) => <option key={t}>{t}</option>)}
             </select>
