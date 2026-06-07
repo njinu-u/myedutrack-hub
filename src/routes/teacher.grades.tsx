@@ -8,11 +8,20 @@ import { listStudents } from "@/lib/students.functions";
 import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { getTaxonomy } from "@/lib/taxonomy.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
-import { Loader2, Save, BookOpen } from "lucide-react";
+import { Loader2, Save, BookOpen, Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export const Route = createFileRoute("/teacher/grades")({ component: TeacherGrades });
 
