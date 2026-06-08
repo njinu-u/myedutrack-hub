@@ -600,7 +600,7 @@ function StudentsPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => bulkInviteMut.mutate(importSummary.parents)}
+                      onClick={() => { setBulkEntries(importSummary.parents); setImportSummary(null); setBulkOptsOpen(true); }}
                       disabled={bulkInviteMut.isPending}
                       className="px-3 py-2 rounded-full bg-navy text-white text-xs inline-flex items-center gap-1 disabled:opacity-50"
                     >
