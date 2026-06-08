@@ -105,6 +105,8 @@ function StudentsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const inviteMut = useMutation({
     mutationFn: async () => {
       if (!inviteFor) return { sent: [] as Awaited<ReturnType<typeof invite>>[] };
       const emails = inviteEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
