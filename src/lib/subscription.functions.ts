@@ -314,7 +314,7 @@ export const paypalSmokeTestVerify = createServerFn({ method: "POST" })
       message: `PayPal smoke test succeeded ($${PAYPAL_SMOKE_TEST_AMOUNT})`,
       actor_user_id: userId,
       school_id: appUser.school_id,
-      details: { orderId: order.id, captureId: capture.id, env: envMode },
+      details: { orderId: order.id ?? data.orderId, captureId: capture.id ?? null, env: envMode },
     });
 
     return {
