@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PageHead, Card } from "@/components/portal-layout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Users, BarChart3 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { buildClassLabelSet, matchesAnyClass, studentClassCandidates } from "@/lib/class-label";
 
 export const Route = createFileRoute("/teacher/classes")({
   head: () => ({ meta: [{ title: "My Classes — EduTrack" }] }),
@@ -49,18 +52,34 @@ function Page() {
     },
   });
 
+  const fetchAssignments = useServerFn(getMyTeacherAssignments);
+  const aQ = useQuery({
+    queryKey: ["my-teacher-assignments"],
+    enabled: isReal,
+    queryFn: () => fetchAssignments(),
+  });
+  const myClassNorms = useMemo(
+    () => buildClassLabelSet((aQ.data?.items ?? []).map((a) => a.class_label)),
+    [aQ.data],
+  );
+
+  const filteredStudents = useMemo(
+    () => (q.data ?? []).filter((s) => matchesAnyClass(studentClassCandidates(s), myClassNorms)),
+    [q.data, myClassNorms],
+  );
+
   const groups = useMemo(() => {
     const g = new Map<string, Student[]>();
-    for (const s of q.data ?? []) {
+    for (const s of filteredStudents) {
       const k = s.class_id || s.grade || "Unassigned";
       const arr = g.get(k) ?? []; arr.push(s); g.set(k, arr);
     }
     return g;
-  }, [q.data]);
+  }, [filteredStudents]);
 
   const engagement = useMemo(() => {
     const studentClass = new Map<string, string>();
-    for (const s of q.data ?? []) studentClass.set(s.id, s.class_id || s.grade || "Unassigned");
+    for (const s of filteredStudents) studentClass.set(s.id, s.class_id || s.grade || "Unassigned");
     const tally = new Map<string, { present: number; total: number }>();
     for (const a of eq.data ?? []) {
       const k = studentClass.get(a.student_id); if (!k) continue;

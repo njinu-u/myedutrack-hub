@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { useAuth } from "@/lib/auth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listAttendanceForDate, markAttendance } from "@/lib/attendance.functions";
+import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Check, X, Clock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buildClassLabelSet, matchesAnyClass, studentClassCandidates } from "@/lib/class-label";
 
 export const Route = createFileRoute("/teacher/attendance")({ component: TeacherAttendance });
 
@@ -38,6 +40,7 @@ function TeacherAttendance() {
 function RealRegister({ date, setDate }: { date: string; setDate: (d: string) => void }) {
   const qc = useQueryClient();
   const fetchRows = useServerFn(listAttendanceForDate);
+  const fetchAssignments = useServerFn(getMyTeacherAssignments);
   const mark = useServerFn(markAttendance);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -47,6 +50,12 @@ function RealRegister({ date, setDate }: { date: string; setDate: (d: string) =>
     queryKey: ["attendance-day", date],
     queryFn: () => fetchRows({ data: { date } }),
   });
+  const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+
+  const myClassNorms = useMemo(
+    () => buildClassLabelSet((aQ.data?.items ?? []).map((a) => a.class_label)),
+    [aQ.data],
+  );
 
   const setStatus = async (student_id: string, status: Status) => {
     setSavingId(student_id);
@@ -61,7 +70,10 @@ function RealRegister({ date, setDate }: { date: string; setDate: (d: string) =>
     }
   };
 
-  const rows = q.data?.rows ?? [];
+  const rows = useMemo(
+    () => (q.data?.rows ?? []).filter((r) => matchesAnyClass(studentClassCandidates(r), myClassNorms)),
+    [q.data, myClassNorms],
+  );
 
   return (
     <div className="space-y-6">
