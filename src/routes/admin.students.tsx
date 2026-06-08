@@ -64,7 +64,47 @@ function StudentsPage() {
   const [inviteFor, setInviteFor] = useState<{ id: string; name: string } | null>(null);
   const [inviteEmails, setInviteEmails] = useState("");
 
-  const inviteMut = useMutation({
+  // Edit student state
+  const [editFor, setEditFor] = useState<{ id: string; full_name: string; grade: string; class_id: string; email: string } | null>(null);
+  const [editParentEmails, setEditParentEmails] = useState("");
+
+  const editMut = useMutation({
+    mutationFn: async () => {
+      if (!editFor) throw new Error("No student selected");
+      await editStudent({ data: {
+        id: editFor.id,
+        full_name: editFor.full_name.trim() || undefined,
+        grade: editFor.grade.trim() || null,
+        class_id: editFor.class_id.trim() || null,
+        email: editFor.email.trim() || null,
+      } });
+      const parentEmails = editParentEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      const sent: Awaited<ReturnType<typeof invite>>[] = [];
+      for (const pe of parentEmails) {
+        try {
+          const res = await invite({ data: { role: "parent", name: `Parent of ${editFor.full_name}`, email: pe, linked_student_id: editFor.id } });
+          sent.push(res);
+        } catch (err) { console.error("parent invite failed", pe, err); toast.error(`Could not invite ${pe}`); }
+      }
+      return { sent, name: editFor.full_name };
+    },
+    onSuccess: ({ sent, name }) => {
+      toast.success("Student updated");
+      sent.forEach((payload, idx) => {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: "parent", recipient_name: "there", recipient_email: payload.invitation.email!,
+          school_name: payload.school_name, admin_name: payload.admin_name, invite_url: url, student_name: name,
+        });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      if (sent.length > 0) toast(`${sent.length} parent invitation${sent.length>1?"s":""} saved. Gmail tabs will open.`, { duration: 6000 });
+      setEditFor(null); setEditParentEmails("");
+      qc.invalidateQueries({ queryKey: ["admin-students"] });
+      qc.invalidateQueries({ queryKey: ["invitations"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
     mutationFn: async () => {
       if (!inviteFor) return { sent: [] as Awaited<ReturnType<typeof invite>>[] };
       const emails = inviteEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
