@@ -223,6 +223,10 @@ function StudentsPage() {
         toast.error(`Import failed: ${res.failed.length} row${res.failed.length>1?"s":""} could not be saved`);
       }
       qc.invalidateQueries({ queryKey: ["admin-students"] });
+      // Auto-send parent invitations when parent emails were detected in the file
+      if (res.parents.length > 0) {
+        setTimeout(() => bulkInviteMut.mutate(res.parents), 400);
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
