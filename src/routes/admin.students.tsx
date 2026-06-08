@@ -639,6 +639,68 @@ function StudentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk invite options dialog */}
+      <Dialog open={bulkOptsOpen} onOpenChange={setBulkOptsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send parent invitations</DialogTitle>
+            <DialogDescription>
+              {bulkEntries.reduce((n, p) => n + p.emails.length, 0)} invitation
+              {bulkEntries.reduce((n, p) => n + p.emails.length, 0) === 1 ? "" : "s"} across {bulkEntries.length} student{bulkEntries.length === 1 ? "" : "s"}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">How to send</span>
+              <div className="mt-1 grid grid-cols-2 gap-2">
+                <button onClick={() => setBulkMode("gmail")}
+                  className={cn("p-3 rounded-lg border text-left text-sm", bulkMode === "gmail" ? "border-navy bg-navy/5" : "")}>
+                  <div className="font-medium">Open in Gmail</div>
+                  <div className="text-xs text-muted-foreground">A compose tab opens per parent — you click send.</div>
+                </button>
+                <button onClick={() => setBulkMode("silent")}
+                  className={cn("p-3 rounded-lg border text-left text-sm", bulkMode === "silent" ? "border-navy bg-navy/5" : "")}>
+                  <div className="font-medium">Silent (save only)</div>
+                  <div className="text-xs text-muted-foreground">Invitations created — copy / resend later from Invitations.</div>
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Start in (minutes)</span>
+                <input type="number" min={0} max={1440} value={bulkDelayMin}
+                  onChange={(e) => setBulkDelayMin(Number(e.target.value) || 0)}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <span className="text-[11px] text-muted-foreground">0 = send now. Keep this tab open.</span>
+              </label>
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Throttle (ms / email)</span>
+                <input type="number" min={0} max={60000} step={100} value={bulkThrottleMs}
+                  onChange={(e) => setBulkThrottleMs(Number(e.target.value) || 0)}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <span className="text-[11px] text-muted-foreground">Delay between each invitation.</span>
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <button onClick={() => setBulkOptsOpen(false)} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button onClick={startBulkInvite} disabled={bulkInviteMut.isPending || bulkEntries.length === 0}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50">
+              <Mail className="h-3.5 w-3.5" />
+              {bulkDelayMin > 0 ? `Schedule in ${bulkDelayMin} min` : "Start sending"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk progress toast-bar */}
+      {bulkProgress && (
+        <div className="fixed bottom-4 right-4 z-50 bg-navy text-white rounded-full px-4 py-2 text-sm shadow-lg inline-flex items-center gap-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Sending invitations… {bulkProgress.done}/{bulkProgress.total}
+        </div>
+      )}
     </div>
   );
 }
