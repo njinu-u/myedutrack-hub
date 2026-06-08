@@ -189,7 +189,7 @@ export const updateStudent = createServerFn({ method: "POST" })
       if (v === undefined) continue;
       clean[k] = v === "" ? null : v;
     }
-    const { error } = await context.supabase.from("students").update(clean).eq("id", id);
+    const { error } = await context.supabase.from("students").update(clean as never).eq("id", id);
     if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true as const };
   });
