@@ -473,6 +473,47 @@ function StudentsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit student dialog */}
+      <Dialog open={!!editFor} onOpenChange={(o) => { if (!o) { setEditFor(null); setEditParentEmails(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit student</DialogTitle>
+            <DialogDescription>Update class, contact details, or add parent invitations.</DialogDescription>
+          </DialogHeader>
+          {editFor && (
+            <div className="space-y-3">
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Full name</span>
+                <input value={editFor.full_name} onChange={(e) => setEditFor({ ...editFor, full_name: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" /></label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Grade</span>
+                  <input value={editFor.grade} onChange={(e) => setEditFor({ ...editFor, grade: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7" /></label>
+                <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Class</span>
+                  <input value={editFor.class_id} onChange={(e) => setEditFor({ ...editFor, class_id: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7B" /></label>
+              </div>
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Student email</span>
+                <input type="email" value={editFor.email} onChange={(e) => setEditFor({ ...editFor, email: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="student@example.com" /></label>
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Invite new parent email(s) (optional)</span>
+                <textarea value={editParentEmails} onChange={(e) => setEditParentEmails(e.target.value)} rows={2} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="mom@example.com, dad@example.com" />
+                <span className="text-[11px] text-muted-foreground">Adds parent invitations linked to this student.</span>
+              </label>
+            </div>
+          )}
+          <DialogFooter>
+            <button onClick={() => { setEditFor(null); setEditParentEmails(""); }} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button
+              disabled={editMut.isPending || !editFor || editFor.full_name.trim().length < 1}
+              onClick={() => editMut.mutate()}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50"
+            >
+              {editMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Save changes
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
 
       <UniversalImporter
         open={importOpen}
