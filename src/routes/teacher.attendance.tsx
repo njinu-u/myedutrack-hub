@@ -40,6 +40,7 @@ function TeacherAttendance() {
 function RealRegister({ date, setDate }: { date: string; setDate: (d: string) => void }) {
   const qc = useQueryClient();
   const fetchRows = useServerFn(listAttendanceForDate);
+  const fetchAssignments = useServerFn(getMyTeacherAssignments);
   const mark = useServerFn(markAttendance);
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -49,6 +50,12 @@ function RealRegister({ date, setDate }: { date: string; setDate: (d: string) =>
     queryKey: ["attendance-day", date],
     queryFn: () => fetchRows({ data: { date } }),
   });
+  const aQ = useQuery({ queryKey: ["my-teacher-assignments"], queryFn: () => fetchAssignments() });
+
+  const myClassNorms = useMemo(
+    () => buildClassLabelSet((aQ.data?.items ?? []).map((a) => a.class_label)),
+    [aQ.data],
+  );
 
   const setStatus = async (student_id: string, status: Status) => {
     setSavingId(student_id);
@@ -63,7 +70,10 @@ function RealRegister({ date, setDate }: { date: string; setDate: (d: string) =>
     }
   };
 
-  const rows = q.data?.rows ?? [];
+  const rows = useMemo(
+    () => (q.data?.rows ?? []).filter((r) => matchesAnyClass(studentClassCandidates(r), myClassNorms)),
+    [q.data, myClassNorms],
+  );
 
   return (
     <div className="space-y-6">
