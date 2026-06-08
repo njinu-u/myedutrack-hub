@@ -36,6 +36,7 @@ function StudentsPage() {
   const bulkAdd = useServerFn(bulkCreateStudents);
   const invite = useServerFn(createInvitation);
   const removeStudent = useServerFn(deleteStudent);
+  const editStudent = useServerFn(updateStudent);
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => removeStudent({ data: { id } }),
