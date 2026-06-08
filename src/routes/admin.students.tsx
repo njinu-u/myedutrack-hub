@@ -533,12 +533,12 @@ function StudentsPage() {
           { key: "photo_url", label: "Photo URL" },
         ]}
         suggestions={{
-          "name": "full_name", "full name": "full_name", "student": "full_name", "student_name": "full_name", "student name": "full_name",
-          "email": "email", "email address": "email", "e-mail": "email",
-          "id": "external_id", "student_id": "external_id", "student id": "external_id", "external_id": "external_id", "admission_no": "external_id", "admission no": "external_id",
-          "grade": "grade", "year": "grade", "form": "grade",
-          "class": "class_id", "class_id": "class_id", "section": "class_id",
-          "photo": "photo_url", "photo_url": "photo_url", "image": "photo_url",
+          "name": "full_name", "full name": "full_name", "fullname": "full_name", "student": "full_name", "student_name": "full_name", "student name": "full_name", "learner": "full_name", "pupil": "full_name",
+          "email": "email", "email address": "email", "e-mail": "email", "student email": "email", "student_email": "email", "school email": "email",
+          "id": "external_id", "student_id": "external_id", "student id": "external_id", "external_id": "external_id", "admission_no": "external_id", "admission no": "external_id", "admission number": "external_id", "roll": "external_id", "roll no": "external_id", "roll number": "external_id",
+          "grade": "grade", "year": "grade", "form": "grade", "year group": "grade", "year_group": "grade", "standard": "grade", "level": "grade",
+          "class": "class_id", "class_id": "class_id", "section": "class_id", "classroom": "class_id", "class name": "class_id", "homeroom": "class_id", "stream": "class_id",
+          "photo": "photo_url", "photo_url": "photo_url", "image": "photo_url", "avatar": "photo_url", "picture": "photo_url",
         }}
         submitting={importMut.isPending}
         onConfirm={async (rows) => { await importMut.mutateAsync(rows); }}
