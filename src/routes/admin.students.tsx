@@ -350,9 +350,24 @@ function StudentsPage() {
                 <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th><th className="text-right py-3 font-medium">Actions</th></tr>
               </thead>
               <tbody>
-                {filtered.map((s) => (
+                {filtered.map((s) => {
+                  const openEdit = () => {
+                    if (!isReal) return;
+                    setEditFor({ id: String(s.id), full_name: s.name, grade: s.raw_grade ?? "", class_id: s.raw_class ?? "", email: s.email ?? "" });
+                    setEditParentEmails("");
+                  };
+                  return (
                   <tr key={s.id} className="border-b last:border-0 hover:bg-secondary/40 transition">
-                    <td className="py-3"><Link to={isReal ? "/admin/students" : `/admin/students/${s.id}`} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link></td>
+                    <td className="py-3">
+                      {isReal ? (
+                        <button onClick={openEdit} className="flex items-center gap-3 text-left w-full">
+                          <img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" />
+                          <div><div className="font-medium hover:text-teal transition">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div>
+                        </button>
+                      ) : (
+                        <Link to={`/admin/students/${s.id}`} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link>
+                      )}
+                    </td>
                     <td>{s.grade}</td>
                     <td className="text-muted-foreground">{s.classGroup}</td>
                     <td className="font-medium">{s.gpa ? s.gpa.toFixed(1) : "—"}</td>
@@ -361,6 +376,9 @@ function StudentsPage() {
                     <td className="text-right">
                       {isReal ? (
                         <div className="inline-flex items-center gap-1">
+                          <button onClick={openEdit} className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-navy/10 text-muted-foreground hover:text-navy transition" aria-label={`Edit ${s.name}`} title="Edit student">
+                            <Pencil className="h-4 w-4" />
+                          </button>
                           <button
                             onClick={() => setInviteFor({ id: String(s.id), name: s.name })}
                             className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-teal/10 text-muted-foreground hover:text-teal transition"
@@ -381,7 +399,8 @@ function StudentsPage() {
                       ) : null}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
