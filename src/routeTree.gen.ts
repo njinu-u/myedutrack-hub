@@ -59,6 +59,7 @@ import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
 import { Route as AdminTaxonomyRouteImport } from './routes/admin.taxonomy'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminSmokeTestRouteImport } from './routes/admin.smoke-test'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -320,6 +321,11 @@ const AdminStaffRoute = AdminStaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSmokeTestRoute = AdminSmokeTestRouteImport.update({
+  id: '/smoke-test',
+  path: '/smoke-test',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -453,6 +460,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -516,6 +524,7 @@ export interface FileRoutesById {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -580,6 +589,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -637,6 +647,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -699,6 +710,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -1108,6 +1120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/smoke-test': {
+      id: '/admin/smoke-test'
+      path: '/smoke-test'
+      fullPath: '/admin/smoke-test'
+      preLoaderRoute: typeof AdminSmokeTestRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -1203,6 +1222,7 @@ interface AdminRouteChildren {
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSmokeTestRoute: typeof AdminSmokeTestRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStudentsRoute: typeof AdminStudentsRouteWithChildren
   AdminTaxonomyRoute: typeof AdminTaxonomyRoute
@@ -1220,6 +1240,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSmokeTestRoute: AdminSmokeTestRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminStudentsRoute: AdminStudentsRouteWithChildren,
   AdminTaxonomyRoute: AdminTaxonomyRoute,
