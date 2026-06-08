@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { STUDENTS } from "@/lib/mock-data";
-import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2, Mail } from "lucide-react";
+import { Search, Download, MessageSquare, Filter, Upload, Plus, Loader2, Trash2, Mail, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth } from "@/lib/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { bulkCreateStudents, createStudent, deleteStudent, listStudents } from "@/lib/students.functions";
+import { bulkCreateStudents, createStudent, deleteStudent, listStudents, updateStudent } from "@/lib/students.functions";
 import { createInvitation } from "@/lib/invitations.functions";
 import { buildInviteEmail, openGmailCompose, buildInviteUrl } from "@/lib/gmail-compose";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ function StudentsPage() {
   const bulkAdd = useServerFn(bulkCreateStudents);
   const invite = useServerFn(createInvitation);
   const removeStudent = useServerFn(deleteStudent);
+  const editStudent = useServerFn(updateStudent);
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => removeStudent({ data: { id } }),
@@ -62,6 +63,48 @@ function StudentsPage() {
   const [studentEmail, setStudentEmail] = useState("");
   const [inviteFor, setInviteFor] = useState<{ id: string; name: string } | null>(null);
   const [inviteEmails, setInviteEmails] = useState("");
+
+  // Edit student state
+  const [editFor, setEditFor] = useState<{ id: string; full_name: string; grade: string; class_id: string; email: string } | null>(null);
+  const [editParentEmails, setEditParentEmails] = useState("");
+
+  const editMut = useMutation({
+    mutationFn: async () => {
+      if (!editFor) throw new Error("No student selected");
+      await editStudent({ data: {
+        id: editFor.id,
+        full_name: editFor.full_name.trim() || undefined,
+        grade: editFor.grade.trim() || null,
+        class_id: editFor.class_id.trim() || null,
+        email: editFor.email.trim() || null,
+      } });
+      const parentEmails = editParentEmails.split(/[\s,;]+/).map((e) => e.trim()).filter((e) => e.includes("@"));
+      const sent: Awaited<ReturnType<typeof invite>>[] = [];
+      for (const pe of parentEmails) {
+        try {
+          const res = await invite({ data: { role: "parent", name: `Parent of ${editFor.full_name}`, email: pe, linked_student_id: editFor.id } });
+          sent.push(res);
+        } catch (err) { console.error("parent invite failed", pe, err); toast.error(`Could not invite ${pe}`); }
+      }
+      return { sent, name: editFor.full_name };
+    },
+    onSuccess: ({ sent, name }) => {
+      toast.success("Student updated");
+      sent.forEach((payload, idx) => {
+        const url = buildInviteUrl(payload.invitation.token);
+        const { subject, body } = buildInviteEmail({
+          role: "parent", recipient_name: "there", recipient_email: payload.invitation.email!,
+          school_name: payload.school_name, admin_name: payload.admin_name, invite_url: url, student_name: name,
+        });
+        setTimeout(() => openGmailCompose({ to: payload.invitation.email!, subject, body }), 300 + idx * 800);
+      });
+      if (sent.length > 0) toast(`${sent.length} parent invitation${sent.length>1?"s":""} saved. Gmail tabs will open.`, { duration: 6000 });
+      setEditFor(null); setEditParentEmails("");
+      qc.invalidateQueries({ queryKey: ["admin-students"] });
+      qc.invalidateQueries({ queryKey: ["invitations"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const inviteMut = useMutation({
     mutationFn: async () => {
@@ -224,8 +267,9 @@ function StudentsPage() {
         nationality: "—", gpa: 0, attendance: 0, status: "On Track",
         joined: new Date(s.created_at).toLocaleDateString(),
         photo: s.photo_url ?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s.full_name)}`,
+        email: s.email ?? "", raw_grade: s.grade ?? "", raw_class: s.class_id ?? "",
       }))
-    : STUDENTS.map((s) => ({ ...s }));
+    : STUDENTS.map((s) => ({ ...s, email: "", raw_grade: s.grade, raw_class: s.classGroup }));
 
   const grades = useMemo(() => Array.from(new Set(display.map((s) => s.grade))).filter(Boolean), [display]);
   const filtered = display.filter((s) => {
@@ -306,9 +350,24 @@ function StudentsPage() {
                 <tr><th className="text-left py-3 font-medium">Student</th><th className="text-left py-3 font-medium">Grade</th><th className="text-left py-3 font-medium">Class</th><th className="text-left py-3 font-medium">GPA</th><th className="text-left py-3 font-medium">Attendance</th><th className="text-left py-3 font-medium">Status</th><th className="text-right py-3 font-medium">Actions</th></tr>
               </thead>
               <tbody>
-                {filtered.map((s) => (
+                {filtered.map((s) => {
+                  const openEdit = () => {
+                    if (!isReal) return;
+                    setEditFor({ id: String(s.id), full_name: s.name, grade: s.raw_grade ?? "", class_id: s.raw_class ?? "", email: s.email ?? "" });
+                    setEditParentEmails("");
+                  };
+                  return (
                   <tr key={s.id} className="border-b last:border-0 hover:bg-secondary/40 transition">
-                    <td className="py-3"><Link to={isReal ? "/admin/students" : `/admin/students/${s.id}`} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link></td>
+                    <td className="py-3">
+                      {isReal ? (
+                        <button onClick={openEdit} className="flex items-center gap-3 text-left w-full">
+                          <img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" />
+                          <div><div className="font-medium hover:text-teal transition">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div>
+                        </button>
+                      ) : (
+                        <Link to={`/admin/students/${s.id}`} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link>
+                      )}
+                    </td>
                     <td>{s.grade}</td>
                     <td className="text-muted-foreground">{s.classGroup}</td>
                     <td className="font-medium">{s.gpa ? s.gpa.toFixed(1) : "—"}</td>
@@ -317,6 +376,9 @@ function StudentsPage() {
                     <td className="text-right">
                       {isReal ? (
                         <div className="inline-flex items-center gap-1">
+                          <button onClick={openEdit} className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-navy/10 text-muted-foreground hover:text-navy transition" aria-label={`Edit ${s.name}`} title="Edit student">
+                            <Pencil className="h-4 w-4" />
+                          </button>
                           <button
                             onClick={() => setInviteFor({ id: String(s.id), name: s.name })}
                             className="inline-flex items-center justify-center h-8 w-8 rounded-full hover:bg-teal/10 text-muted-foreground hover:text-teal transition"
@@ -337,7 +399,8 @@ function StudentsPage() {
                       ) : null}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -409,6 +472,47 @@ function StudentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit student dialog */}
+      <Dialog open={!!editFor} onOpenChange={(o) => { if (!o) { setEditFor(null); setEditParentEmails(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit student</DialogTitle>
+            <DialogDescription>Update class, contact details, or add parent invitations.</DialogDescription>
+          </DialogHeader>
+          {editFor && (
+            <div className="space-y-3">
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Full name</span>
+                <input value={editFor.full_name} onChange={(e) => setEditFor({ ...editFor, full_name: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" /></label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Grade</span>
+                  <input value={editFor.grade} onChange={(e) => setEditFor({ ...editFor, grade: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7" /></label>
+                <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Class</span>
+                  <input value={editFor.class_id} onChange={(e) => setEditFor({ ...editFor, class_id: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="7B" /></label>
+              </div>
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Student email</span>
+                <input type="email" value={editFor.email} onChange={(e) => setEditFor({ ...editFor, email: e.target.value })} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="student@example.com" /></label>
+              <label className="block"><span className="text-xs uppercase tracking-wider text-muted-foreground">Invite new parent email(s) (optional)</span>
+                <textarea value={editParentEmails} onChange={(e) => setEditParentEmails(e.target.value)} rows={2} className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" placeholder="mom@example.com, dad@example.com" />
+                <span className="text-[11px] text-muted-foreground">Adds parent invitations linked to this student.</span>
+              </label>
+            </div>
+          )}
+          <DialogFooter>
+            <button onClick={() => { setEditFor(null); setEditParentEmails(""); }} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button
+              disabled={editMut.isPending || !editFor || editFor.full_name.trim().length < 1}
+              onClick={() => editMut.mutate()}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50"
+            >
+              {editMut.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Save changes
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
 
 
       <UniversalImporter

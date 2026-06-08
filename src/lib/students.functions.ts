@@ -169,3 +169,27 @@ export const deleteStudent = createServerFn({ method: "POST" })
     if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
     return { ok: true as const };
   });
+
+export const updateStudent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z.object({
+      id: z.string().uuid(),
+      full_name: z.string().trim().min(1).max(200).optional(),
+      grade: z.string().trim().max(50).nullable().optional(),
+      class_id: z.string().trim().max(50).nullable().optional(),
+      email: z.union([z.string().trim().email().max(255), z.literal("")]).nullable().optional(),
+      photo_url: z.union([z.string().url().max(500), z.literal("")]).nullable().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { id, ...patch } = data;
+    const clean: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === undefined) continue;
+      clean[k] = v === "" ? null : v;
+    }
+    const { error } = await context.supabase.from("students").update(clean as never).eq("id", id);
+    if (error) { console.error("[server]", error); throw new Error("Request failed. Please try again."); }
+    return { ok: true as const };
+  });
