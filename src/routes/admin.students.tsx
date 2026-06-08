@@ -267,8 +267,9 @@ function StudentsPage() {
         nationality: "—", gpa: 0, attendance: 0, status: "On Track",
         joined: new Date(s.created_at).toLocaleDateString(),
         photo: s.photo_url ?? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s.full_name)}`,
+        email: s.email ?? "", raw_grade: s.grade ?? "", raw_class: s.class_id ?? "",
       }))
-    : STUDENTS.map((s) => ({ ...s }));
+    : STUDENTS.map((s) => ({ ...s, email: "", raw_grade: s.grade, raw_class: s.classGroup }));
 
   const grades = useMemo(() => Array.from(new Set(display.map((s) => s.grade))).filter(Boolean), [display]);
   const filtered = display.filter((s) => {
