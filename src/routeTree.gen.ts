@@ -14,6 +14,7 @@ import { Route as StudentRouteImport } from './routes/student'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -59,6 +60,7 @@ import { Route as AdminTimetableRouteImport } from './routes/admin.timetable'
 import { Route as AdminTaxonomyRouteImport } from './routes/admin.taxonomy'
 import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminSmokeTestRouteImport } from './routes/admin.smoke-test'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
 import { Route as AdminInvitationsRouteImport } from './routes/admin.invitations'
@@ -93,6 +95,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -320,6 +327,11 @@ const AdminStaffRoute = AdminStaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSmokeTestRoute = AdminSmokeTestRouteImport.update({
+  id: '/smoke-test',
+  path: '/smoke-test',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -382,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
   '/parent': typeof ParentRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -396,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -441,6 +455,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -453,6 +468,7 @@ export interface FileRoutesByTo {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -502,6 +518,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
   '/parent': typeof ParentRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -516,6 +533,7 @@ export interface FileRoutesById {
   '/admin/invitations': typeof AdminInvitationsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/smoke-test': typeof AdminSmokeTestRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/students': typeof AdminStudentsRouteWithChildren
   '/admin/taxonomy': typeof AdminTaxonomyRoute
@@ -566,6 +584,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/owner'
     | '/parent'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -580,6 +599,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -625,6 +645,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/notifications'
     | '/owner'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -637,6 +658,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -685,6 +707,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/owner'
     | '/parent'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -699,6 +722,7 @@ export interface FileRouteTypes {
     | '/admin/invitations'
     | '/admin/reports'
     | '/admin/settings'
+    | '/admin/smoke-test'
     | '/admin/staff'
     | '/admin/students'
     | '/admin/taxonomy'
@@ -748,6 +772,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OwnerRoute: typeof OwnerRoute
   ParentRoute: typeof ParentRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
@@ -791,6 +816,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -1108,6 +1140,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStaffRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/smoke-test': {
+      id: '/admin/smoke-test'
+      path: '/smoke-test'
+      fullPath: '/admin/smoke-test'
+      preLoaderRoute: typeof AdminSmokeTestRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -1203,6 +1242,7 @@ interface AdminRouteChildren {
   AdminInvitationsRoute: typeof AdminInvitationsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSmokeTestRoute: typeof AdminSmokeTestRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStudentsRoute: typeof AdminStudentsRouteWithChildren
   AdminTaxonomyRoute: typeof AdminTaxonomyRoute
@@ -1220,6 +1260,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInvitationsRoute: AdminInvitationsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSmokeTestRoute: AdminSmokeTestRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminStudentsRoute: AdminStudentsRouteWithChildren,
   AdminTaxonomyRoute: AdminTaxonomyRoute,
@@ -1335,6 +1376,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OwnerRoute: OwnerRoute,
   ParentRoute: ParentRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
@@ -1345,13 +1387,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
