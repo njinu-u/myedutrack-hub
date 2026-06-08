@@ -9,7 +9,7 @@ export type ReportCardData = {
   subjects: { subject: string; score: number; max_score: number; percent: number; entered_at: string }[];
   average: number | null;
   attendance: { present: number; absent: number; late: number; total: number; rate: number };
-  observations: { id: string; note: string; created_at: string; type: string | null }[];
+  observations: { id: string; note: string; created_at: string; subject: string | null }[];
   parents: { id: string; full_name: string | null; email: string }[];
 };
 
@@ -34,7 +34,7 @@ export const getStudentReportCard = createServerFn({ method: "POST" })
       supabase.from("schools").select("name").eq("id", student.school_id).maybeSingle(),
       supabase.from("grades").select("subject,score,max_score,entered_at,term").eq("student_id", data.student_id).eq("term", data.term).order("entered_at", { ascending: false }),
       supabase.from("attendance").select("status").eq("student_id", data.student_id),
-      supabase.from("observations").select("id,note,created_at,type").eq("student_id", data.student_id).order("created_at", { ascending: false }).limit(10),
+      supabase.from("observations").select("id,note,created_at,subject").eq("student_id", data.student_id).order("created_at", { ascending: false }).limit(10),
       supabase.from("app_users").select("id,full_name,email,role,linked_student_id").eq("linked_student_id", data.student_id).eq("role", "parent"),
     ]);
 
@@ -66,7 +66,7 @@ export const getStudentReportCard = createServerFn({ method: "POST" })
       subjects,
       average,
       attendance: { present, absent, late, total, rate },
-      observations: (obs ?? []).map((o) => ({ id: o.id, note: o.note, created_at: o.created_at, type: o.type })),
+      observations: (obs ?? []).map((o) => ({ id: o.id, note: o.note, created_at: o.created_at, subject: o.subject })),
       parents: (parents ?? []).filter((p) => p.email).map((p) => ({ id: p.id, full_name: p.full_name, email: p.email })),
     };
   });
