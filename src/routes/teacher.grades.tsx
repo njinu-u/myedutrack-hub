@@ -63,18 +63,10 @@ function RealGrades() {
   // all subjects configured by the school admin
   const schoolSubjects = useMemo(() => tQ.data?.taxonomy?.subjects ?? [], [tQ.data]);
 
-  // normalize labels for fuzzy matching: "Year 1C" / "Grade 1C" / "Class 1C" / "1C" → "1c"
-  const normalize = (v: string) =>
-    v.toLowerCase().replace(/\b(year|grade|class|form|std|standard)\b/g, "").replace(/[\s\-_]+/g, "").trim();
-
-  const myClassNorms = useMemo(() => {
-    const s = new Set<string>();
-    for (const a of aQ.data?.items ?? []) {
-      const n = normalize(a.class_label);
-      if (n) s.add(n);
-    }
-    return s;
-  }, [aQ.data]);
+  const myClassNorms = useMemo(
+    () => buildClassLabelSet((aQ.data?.items ?? []).map((a) => a.class_label)),
+    [aQ.data],
+  );
 
   const classes = useMemo(() => {
     const set = new Map<string, string>();
@@ -82,13 +74,7 @@ function RealGrades() {
       const key = s.class_id ? `class:${s.class_id}` : s.grade ? `grade:${s.grade}` : "";
       const label = s.class_id ? `Class ${s.class_id}` : s.grade ? `Grade ${s.grade}` : "Unassigned";
       if (!key) continue;
-      if (myClassNorms.size > 0) {
-        const candidates = [s.class_id, s.grade, label, `Year ${s.class_id ?? ""}`, `Year ${s.grade ?? ""}`]
-          .filter(Boolean)
-          .map((v) => normalize(String(v)));
-        const match = candidates.some((c) => myClassNorms.has(c) || [...myClassNorms].some((m) => m === c || m.includes(c) || c.includes(m)));
-        if (!match) continue;
-      }
+      if (!matchesAnyClass(studentClassCandidates(s), myClassNorms)) continue;
       set.set(key, label);
     }
     return [...set.entries()].map(([k, v]) => ({ key: k, label: v }));
