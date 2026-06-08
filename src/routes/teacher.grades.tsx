@@ -63,10 +63,16 @@ function RealGrades() {
   // all subjects configured by the school admin
   const schoolSubjects = useMemo(() => tQ.data?.taxonomy?.subjects ?? [], [tQ.data]);
 
-  // class labels the teacher is assigned to
-  const myClassLabels = useMemo(() => {
+  // normalize labels for fuzzy matching: "Year 1C" / "Grade 1C" / "Class 1C" / "1C" → "1c"
+  const normalize = (v: string) =>
+    v.toLowerCase().replace(/\b(year|grade|class|form|std|standard)\b/g, "").replace(/[\s\-_]+/g, "").trim();
+
+  const myClassNorms = useMemo(() => {
     const s = new Set<string>();
-    for (const a of aQ.data?.items ?? []) s.add(a.class_label);
+    for (const a of aQ.data?.items ?? []) {
+      const n = normalize(a.class_label);
+      if (n) s.add(n);
+    }
     return s;
   }, [aQ.data]);
 
@@ -76,15 +82,17 @@ function RealGrades() {
       const key = s.class_id ? `class:${s.class_id}` : s.grade ? `grade:${s.grade}` : "";
       const label = s.class_id ? `Class ${s.class_id}` : s.grade ? `Grade ${s.grade}` : "Unassigned";
       if (!key) continue;
-      // filter to classes the teacher teaches (match by class_id or grade label)
-      if (myClassLabels.size > 0) {
-        const raw = s.class_id ?? s.grade ?? "";
-        if (!myClassLabels.has(raw) && !myClassLabels.has(label)) continue;
+      if (myClassNorms.size > 0) {
+        const candidates = [s.class_id, s.grade, label, `Year ${s.class_id ?? ""}`, `Year ${s.grade ?? ""}`]
+          .filter(Boolean)
+          .map((v) => normalize(String(v)));
+        const match = candidates.some((c) => myClassNorms.has(c) || [...myClassNorms].some((m) => m === c || m.includes(c) || c.includes(m)));
+        if (!match) continue;
       }
       set.set(key, label);
     }
     return [...set.entries()].map(([k, v]) => ({ key: k, label: v }));
-  }, [sQ.data, myClassLabels]);
+  }, [sQ.data, myClassNorms]);
 
   useEffect(() => { if (!classKey && classes.length) setClassKey(classes[0].key); }, [classes, classKey]);
   useEffect(() => { if (!subject && schoolSubjects.length) setSubject(schoolSubjects[0]); }, [schoolSubjects, subject]);
