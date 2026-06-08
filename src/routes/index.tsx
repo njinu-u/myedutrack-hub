@@ -365,7 +365,10 @@ function Footer() {
       </div>
       <div className="max-w-7xl mx-auto px-5 lg:px-8 mt-10 pt-6 border-t border-white/10 flex flex-wrap justify-between gap-3 text-xs text-white/50">
         <span>© {new Date().getFullYear()} EduTrack International</span>
-        <span>The school operating system that thinks.</span>
+        <span className="flex items-center gap-3">
+          <Link to="/privacy" className="hover:text-white">Privacy</Link>
+          <span>The school operating system that thinks.</span>
+        </span>
       </div>
     </footer>
   );
