@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { PageHead, Card } from "@/components/portal-layout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Users, BarChart3 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { buildClassLabelSet, matchesAnyClass, studentClassCandidates } from "@/lib/class-label";
 
 export const Route = createFileRoute("/teacher/classes")({
   head: () => ({ meta: [{ title: "My Classes — EduTrack" }] }),
