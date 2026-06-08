@@ -10,6 +10,7 @@ import { getTaxonomy } from "@/lib/taxonomy.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
 import { Loader2, Save, BookOpen, Check, ChevronsUpDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buildClassLabelSet, matchesAnyClass, studentClassCandidates } from "@/lib/class-label";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
