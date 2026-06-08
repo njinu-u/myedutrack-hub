@@ -199,6 +199,14 @@ function StudentsPage() {
 
   const [importSummary, setImportSummary] = useState<{ added: number; updated: number; failed: { row: number; reason: string }[]; parents: { student_id: string; student_name: string; emails: string[] }[] } | null>(null);
 
+  // Bulk invite scheduling/throttle options
+  const [bulkOptsOpen, setBulkOptsOpen] = useState(false);
+  const [bulkEntries, setBulkEntries] = useState<{ student_id: string; student_name: string; emails: string[] }[]>([]);
+  const [bulkMode, setBulkMode] = useState<"gmail" | "silent">("gmail");
+  const [bulkDelayMin, setBulkDelayMin] = useState(0);
+  const [bulkThrottleMs, setBulkThrottleMs] = useState(800);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+
   const importMut = useMutation({
     mutationFn: (rows: ImportedRow[]) => bulkAdd({
       data: {
@@ -223,46 +231,61 @@ function StudentsPage() {
         toast.error(`Import failed: ${res.failed.length} row${res.failed.length>1?"s":""} could not be saved`);
       }
       qc.invalidateQueries({ queryKey: ["admin-students"] });
-      // Auto-send parent invitations when parent emails were detected in the file
+      // Offer scheduling/throttle options instead of auto-firing
       if (res.parents.length > 0) {
-        setTimeout(() => bulkInviteMut.mutate(res.parents), 400);
+        setBulkEntries(res.parents);
+        setBulkOptsOpen(true);
       }
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   const bulkInviteMut = useMutation({
-    mutationFn: async (entries: { student_id: string; student_name: string; emails: string[] }[]) => {
-      const payloads: { email: string; student_name: string; res: Awaited<ReturnType<typeof invite>> }[] = [];
-      for (const entry of entries) {
-        for (const em of entry.emails) {
-          try {
-            const res = await invite({
-              data: { role: "parent", name: `Parent of ${entry.student_name}`, email: em, linked_student_id: entry.student_id },
+    mutationFn: async (opts: { entries: { student_id: string; student_name: string; emails: string[] }[]; mode: "gmail" | "silent"; delayMs: number; throttleMs: number }) => {
+      const flat: { email: string; student_name: string; student_id: string }[] = [];
+      for (const entry of opts.entries) for (const em of entry.emails) flat.push({ email: em, student_name: entry.student_name, student_id: entry.student_id });
+      if (opts.delayMs > 0) await new Promise((r) => setTimeout(r, opts.delayMs));
+      setBulkProgress({ done: 0, total: flat.length });
+      const sent: { email: string }[] = [];
+      const failed: { email: string; reason: string }[] = [];
+      for (let i = 0; i < flat.length; i++) {
+        const { email, student_name, student_id } = flat[i];
+        try {
+          const res = await invite({ data: { role: "parent", name: `Parent of ${student_name}`, email, linked_student_id: student_id } });
+          sent.push({ email });
+          if (opts.mode === "gmail") {
+            const url = buildInviteUrl(res.invitation.token);
+            const { subject, body } = buildInviteEmail({
+              role: "parent", recipient_name: "there", recipient_email: email,
+              school_name: res.school_name, admin_name: res.admin_name, invite_url: url, student_name,
             });
-            payloads.push({ email: em, student_name: entry.student_name, res });
-          } catch (err) {
-            console.error("bulk invite failed", em, err);
+            openGmailCompose({ to: email, subject, body });
           }
+        } catch (err) {
+          console.error("bulk invite failed", email, err);
+          failed.push({ email, reason: err instanceof Error ? err.message : "Failed" });
         }
+        setBulkProgress({ done: i + 1, total: flat.length });
+        if (i < flat.length - 1 && opts.throttleMs > 0) await new Promise((r) => setTimeout(r, opts.throttleMs));
       }
-      return payloads;
+      return { sent, failed, mode: opts.mode };
     },
-    onSuccess: (payloads) => {
-      if (payloads.length === 0) { toast.error("No invitations could be created"); return; }
-      payloads.forEach(({ email, student_name, res }, idx) => {
-        const url = buildInviteUrl(res.invitation.token);
-        const { subject, body } = buildInviteEmail({
-          role: "parent", recipient_name: "there", recipient_email: email,
-          school_name: res.school_name, admin_name: res.admin_name, invite_url: url, student_name,
-        });
-        setTimeout(() => openGmailCompose({ to: email, subject, body }), 300 + idx * 800);
-      });
-      toast.success(`${payloads.length} parent invitation${payloads.length>1?"s":""} saved. Gmail tabs will open to send.`);
+    onSuccess: ({ sent, failed, mode }) => {
+      setBulkProgress(null);
+      if (sent.length === 0 && failed.length > 0) { toast.error(`All ${failed.length} invitations failed`); return; }
+      const tail = mode === "gmail" ? "Gmail tabs opened for sending." : "Saved silently — share links from the Invitations page.";
+      toast.success(`${sent.length} parent invitation${sent.length>1?"s":""} created. ${tail}`);
+      if (failed.length > 0) toast.error(`${failed.length} could not be created`);
       qc.invalidateQueries({ queryKey: ["invitations"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => { setBulkProgress(null); toast.error(e.message); },
   });
+
+  const startBulkInvite = () => {
+    if (bulkEntries.length === 0) return;
+    setBulkOptsOpen(false);
+    bulkInviteMut.mutate({ entries: bulkEntries, mode: bulkMode, delayMs: Math.max(0, bulkDelayMin) * 60_000, throttleMs: Math.max(0, bulkThrottleMs) });
+  };
 
   const realList = realQuery.data?.students ?? [];
   const display = isReal
@@ -577,7 +600,7 @@ function StudentsPage() {
                       </div>
                     </div>
                     <button
-                      onClick={() => bulkInviteMut.mutate(importSummary.parents)}
+                      onClick={() => { setBulkEntries(importSummary.parents); setImportSummary(null); setBulkOptsOpen(true); }}
                       disabled={bulkInviteMut.isPending}
                       className="px-3 py-2 rounded-full bg-navy text-white text-xs inline-flex items-center gap-1 disabled:opacity-50"
                     >
@@ -616,6 +639,68 @@ function StudentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk invite options dialog */}
+      <Dialog open={bulkOptsOpen} onOpenChange={setBulkOptsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send parent invitations</DialogTitle>
+            <DialogDescription>
+              {bulkEntries.reduce((n, p) => n + p.emails.length, 0)} invitation
+              {bulkEntries.reduce((n, p) => n + p.emails.length, 0) === 1 ? "" : "s"} across {bulkEntries.length} student{bulkEntries.length === 1 ? "" : "s"}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground">How to send</span>
+              <div className="mt-1 grid grid-cols-2 gap-2">
+                <button onClick={() => setBulkMode("gmail")}
+                  className={cn("p-3 rounded-lg border text-left text-sm", bulkMode === "gmail" ? "border-navy bg-navy/5" : "")}>
+                  <div className="font-medium">Open in Gmail</div>
+                  <div className="text-xs text-muted-foreground">A compose tab opens per parent — you click send.</div>
+                </button>
+                <button onClick={() => setBulkMode("silent")}
+                  className={cn("p-3 rounded-lg border text-left text-sm", bulkMode === "silent" ? "border-navy bg-navy/5" : "")}>
+                  <div className="font-medium">Silent (save only)</div>
+                  <div className="text-xs text-muted-foreground">Invitations created — copy / resend later from Invitations.</div>
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Start in (minutes)</span>
+                <input type="number" min={0} max={1440} value={bulkDelayMin}
+                  onChange={(e) => setBulkDelayMin(Number(e.target.value) || 0)}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <span className="text-[11px] text-muted-foreground">0 = send now. Keep this tab open.</span>
+              </label>
+              <label className="block">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Throttle (ms / email)</span>
+                <input type="number" min={0} max={60000} step={100} value={bulkThrottleMs}
+                  onChange={(e) => setBulkThrottleMs(Number(e.target.value) || 0)}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border bg-card text-sm" />
+                <span className="text-[11px] text-muted-foreground">Delay between each invitation.</span>
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <button onClick={() => setBulkOptsOpen(false)} className="px-3 py-2 rounded-full bg-secondary text-sm">Cancel</button>
+            <button onClick={startBulkInvite} disabled={bulkInviteMut.isPending || bulkEntries.length === 0}
+              className="px-4 py-2 rounded-full bg-navy text-white text-sm inline-flex items-center gap-2 disabled:opacity-50">
+              <Mail className="h-3.5 w-3.5" />
+              {bulkDelayMin > 0 ? `Schedule in ${bulkDelayMin} min` : "Start sending"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk progress toast-bar */}
+      {bulkProgress && (
+        <div className="fixed bottom-4 right-4 z-50 bg-navy text-white rounded-full px-4 py-2 text-sm shadow-lg inline-flex items-center gap-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Sending invitations… {bulkProgress.done}/{bulkProgress.total}
+        </div>
+      )}
     </div>
   );
 }
