@@ -14,6 +14,7 @@ import { Route as StudentRouteImport } from './routes/student'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ParentRouteImport } from './routes/parent'
 import { Route as OwnerRouteImport } from './routes/owner'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -94,6 +95,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentRoute = ParentRouteImport.update({
@@ -388,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
   '/parent': typeof ParentRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -510,6 +518,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/owner': typeof OwnerRoute
   '/parent': typeof ParentRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
@@ -575,6 +584,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/owner'
     | '/parent'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -635,6 +645,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/notifications'
     | '/owner'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -696,6 +707,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/owner'
     | '/parent'
+    | '/privacy'
     | '/profile'
     | '/reset-password'
     | '/signup'
@@ -760,6 +772,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OwnerRoute: typeof OwnerRoute
   ParentRoute: typeof ParentRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
@@ -803,6 +816,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parent': {
@@ -1356,6 +1376,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OwnerRoute: OwnerRoute,
   ParentRoute: ParentRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,

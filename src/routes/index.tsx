@@ -351,6 +351,7 @@ function Footer() {
             <li><Link to="/login">Sign in</Link></li>
             <li><Link to="/demo">Live demo</Link></li>
             <li><a href="#pricing">Pricing</a></li>
+            <li><Link to="/privacy">Privacy</Link></li>
           </ul>
         </div>
         <div>
