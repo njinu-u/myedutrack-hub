@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, PageHead } from "@/components/portal-layout";
 import { useAuth } from "@/lib/auth";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listAttendanceForDate, markAttendance } from "@/lib/attendance.functions";
+import { getMyTeacherAssignments } from "@/lib/assignments.functions";
 import { useRealtimeInvalidate } from "@/lib/use-realtime";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Check, X, Clock, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { buildClassLabelSet, matchesAnyClass, studentClassCandidates } from "@/lib/class-label";
 
 export const Route = createFileRoute("/teacher/attendance")({ component: TeacherAttendance });
 
