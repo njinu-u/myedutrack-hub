@@ -392,7 +392,7 @@ function StudentsPage() {
                           <div><div className="font-medium hover:text-teal transition">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div>
                         </button>
                       ) : (
-                        <Link to={`/admin/students/${s.id}`} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link>
+                        <Link to="/admin/students/$id" params={{ id: s.id }} className="flex items-center gap-3"><img src={s.photo} className="h-9 w-9 rounded-full object-cover" alt="" /><div><div className="font-medium">{s.name}</div><div className="text-xs text-muted-foreground">{s.classGroup} · joined {s.joined}</div></div></Link>
                       )}
                     </td>
                     <td>{s.grade}</td>

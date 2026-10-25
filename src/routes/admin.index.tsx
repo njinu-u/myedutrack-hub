@@ -178,7 +178,7 @@ function DemoAdmin() {
         <div className="text-xs uppercase tracking-wider text-muted-foreground"><Activity className="h-3.5 w-3.5 inline -mt-0.5" /> Flagged students</div>
         <div className="space-y-2 mt-3">
           {STUDENTS.filter(s => s.status === "Critical" || s.status === "At Risk").map((s) => (
-            <Link key={s.id} to={`/admin/students/${s.id}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary">
+            <Link key={s.id} to="/admin/students/$id" params={{ id: s.id }} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary">
               <img src={s.photo} alt="" className="h-9 w-9 rounded-full object-cover" />
               <div className="flex-1 min-w-0"><div className="text-sm font-medium truncate">{s.name}</div><div className="text-[11px] text-muted-foreground truncate">{s.flags[0]}</div></div>
               <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ${s.status === "Critical" ? "bg-danger/15 text-danger" : "bg-amber/15 text-amber"}`}>{s.status}</span>
